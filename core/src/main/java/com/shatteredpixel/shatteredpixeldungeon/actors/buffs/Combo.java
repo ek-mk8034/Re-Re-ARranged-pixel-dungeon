@@ -92,17 +92,25 @@ public class Combo extends Buff implements ActionIndicator.Action {
 		count++;
 		comboTime = Math.max(comboTime, 5f);
 
-		if (!enemy.isAlive() || (enemy.buff(Corruption.class) != null && enemy.HP == enemy.HT)){
-			comboTime = 15f + 15f*((Hero)target).pointsInTalent(Talent.CLEAVE);
-			if (Dungeon.hero.hasTalent(Talent.SKILL_REPEAT)) {
-				if (Dungeon.hero.pointsInTalent(Talent.SKILL_REPEAT) == 3) {
-					clobberUsed = false;
-					parryUsed= false;
-				} else {
-					if (moveBeingUsed == ComboMove.CLOBBER) clobberUsed = false;
-					if (moveBeingUsed == ComboMove.PARRY && Dungeon.hero.pointsInTalent(Talent.SKILL_REPEAT) > 1) parryUsed= false;
-				}
-			}
+		if (!enemy.isAlive() || (enemy.buff(Corruption.class) != null && enemy.HP == enemy.HT)) {
+
+		    // v3.3.5 quit-exploit 방지 의도는 유지하되,
+		    // RE 모드에서 comboTime을 "무조건 150으로 덮어써서" 시작해버리는 부작용을 막기 위해 max로 보정한다.
+		    float safeComboTime = 150f + 15f * ((Hero) target).pointsInTalent(Talent.CLEAVE);
+		    comboTime = Math.max(comboTime, safeComboTime);
+
+		    // 너 커스텀 유지 (SKILL_REPEAT 로직)
+		    if (Dungeon.hero.hasTalent(Talent.SKILL_REPEAT)) {
+		        if (Dungeon.hero.pointsInTalent(Talent.SKILL_REPEAT) == 3) {
+		            clobberUsed = false;
+		            parryUsed = false;
+		        } else {
+		            if (moveBeingUsed == ComboMove.CLOBBER) clobberUsed = false;
+		            if (moveBeingUsed == ComboMove.PARRY && Dungeon.hero.pointsInTalent(Talent.SKILL_REPEAT) > 1) {
+		                parryUsed = false;
+		            }
+		        }
+		    }
 		}
 
 		initialComboTime = comboTime;
@@ -345,6 +353,7 @@ public class Combo extends Buff implements ActionIndicator.Action {
 	}
 
 	private static ComboMove moveBeingUsed;
+	private static int furyHitsLeft = 0;
 
 	private void doAttack(final Char enemy) {
 
@@ -446,9 +455,14 @@ public class Combo extends Buff implements ActionIndicator.Action {
 				break;
 
 			case FURY:
-				count--;
+				if (count > 0){
+					furyHitsLeft = count;
+					count = 0;
+					hero.spend(hero.attackDelay());
+				}
+				furyHitsLeft--;
 				//fury attacks as many times as you have combo count
-				if (count > 0 && enemy.isAlive() && hero.canAttack(enemy) &&
+				if (furyHitsLeft > 0 && enemy.isAlive() && hero.canAttack(enemy) &&
 						(wasAlly || enemy.alignment != target.alignment)){
 					target.sprite.attack(enemy.pos, new Callback() {
 						@Override
@@ -457,10 +471,11 @@ public class Combo extends Buff implements ActionIndicator.Action {
 						}
 					});
 				} else {
+					furyHitsLeft = 0;
 					detach();
 					Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
 					ActionIndicator.clearAction(Combo.this);
-					hero.spendAndNext(hero.attackDelay());
+					hero.next();
 				}
 				break;
 
