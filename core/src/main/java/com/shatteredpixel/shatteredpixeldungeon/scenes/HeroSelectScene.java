@@ -66,6 +66,8 @@ import com.watabou.utils.GameMath;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
 import com.watabou.utils.RectF;
+// ✅ 추가: Safe Insets 상수
+import com.watabou.utils.PlatformSupport;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -91,6 +93,8 @@ public class HeroSelectScene extends PixelScene {
 	private IconButton btnExit;
 
 	private RectF insets;
+	// ✅ 추가: portrait 바닥(네비게이션 바) 보정용
+	private float bottomInset = 0f;
 
 	private static boolean heroWasRandomized = true;
 	private static boolean chalWasRandomized = false;
@@ -98,6 +102,14 @@ public class HeroSelectScene extends PixelScene {
 	@Override
 	public void create() {
 		super.create();
+
+		// ✅ Safe Insets 획득 (네비게이션 바/노치 등)
+		try {
+			insets = Game.platform.getSafeInsets(PlatformSupport.INSET_ALL);
+		} catch (Throwable t) {
+			insets = null;
+		}
+		bottomInset = (insets != null) ? insets.bottom : 0f;
 
 		Dungeon.hero = null;
 
@@ -265,20 +277,9 @@ public class HeroSelectScene extends PixelScene {
 				align(button);
 				curX += btnWidth+1;
 				count++;
-//				if (count >= (1+heroBtns.size())/2){
-//					curX -= btnWidth*count + count;
-//					curY += btnHeight+1;
-//					if (heroBtns.size()%2 != 0){
-//						curX += btnWidth/2f;
-//					}
-//					count = 0;
-//				}
 				if (count >= 5){ //버튼 5개마다 줄바꿈
 					curX -= btnWidth*count + count;
 					curY += btnHeight+1;
-//					if (heroBtns.size()%3 != 0){
-//						curX += btnWidth/2f;
-//					}
 					count = 0;
 				}
 			}
@@ -334,12 +335,9 @@ public class HeroSelectScene extends PixelScene {
 				btnWidth += Math.min(curX / (heroBtns.size() / 2f), 15);
 				curX = (Camera.main.width - btnWidth * heroBtns.size() / 2f) / 2f;
 			}
-			float curY = Camera.main.height - HeroBtn.HEIGHT + 3;
 
-			//for (StyledButton button : heroBtns) {
-			//	button.setRect(curX, curY, btnWidth, HeroBtn.HEIGHT);
-			//	curX += btnWidth;
-			//}
+			// ✅ 핵심: portrait 바닥 기준을 bottomInset 만큼 올림
+			float curY = Camera.main.height - bottomInset - HeroBtn.HEIGHT + 3;
 
 			int count = 0;
 			for (StyledButton button : heroBtns){
@@ -352,9 +350,13 @@ public class HeroSelectScene extends PixelScene {
 					count = 0;
 				}
 			}
-			title.setPos((Camera.main.width - title.width()) / 2f, (Camera.main.height - HeroBtn.HEIGHT*2 - title.height() - 4));
 
-			btnOptions.setRect(heroBtns.get(0).left() + 16, Camera.main.height-HeroBtn.HEIGHT*2-16, 20, 21);
+			title.setPos((Camera.main.width - title.width()) / 2f,
+					(Camera.main.height - bottomInset - HeroBtn.HEIGHT*2 - title.height() - 4));
+
+			btnOptions.setRect(heroBtns.get(0).left() + 16,
+					Camera.main.height - bottomInset - HeroBtn.HEIGHT*2 - 16, 20, 21);
+
 			optionsPane.setPos(heroBtns.get(0).left(), 0);
 		}
 
@@ -465,7 +467,9 @@ public class HeroSelectScene extends PixelScene {
 			startBtn.text(Messages.titleCase(cl.title()));
 			startBtn.setSize(startBtn.reqWidth() + 8, 21);
 
-			startBtn.setPos((Camera.main.width - startBtn.width())/2f, (Camera.main.height - HeroBtn.HEIGHT*2 + 2 - startBtn.height()));
+			// ✅ 핵심: 선택 후 버튼들도 bottomInset 반영
+			startBtn.setPos((Camera.main.width - startBtn.width())/2f,
+					(Camera.main.height - bottomInset - HeroBtn.HEIGHT*2 + 2 - startBtn.height()));
 			PixelScene.align(startBtn);
 
 			infoButton.visible = infoButton.active = true;
@@ -798,6 +802,7 @@ public class HeroSelectScene extends PixelScene {
 							text(Messages.get(HeroSelectScene.class, "daily"));
 							timeToUpdate = Long.MAX_VALUE;
 						}
+
 					}
 
 				}

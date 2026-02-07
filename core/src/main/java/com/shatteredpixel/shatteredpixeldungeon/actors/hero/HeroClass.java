@@ -28,15 +28,15 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.QuickSlot;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.adventurer.Root;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.adventurer.Sprout;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.adventurer.TreasureMap;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.archer.DashAbility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.archer.Hunt;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.archer.Snipe;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.AscendedForm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.PowerOfMany;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.Trinity;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.adventurer.Root;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.adventurer.Sprout;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.adventurer.TreasureMap;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Challenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.ElementalStrike;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Feint;
@@ -64,7 +64,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.samurai.Sh
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.HeroicLeap;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Shockwave;
-import com.shatteredpixel.shatteredpixeldungeon.items.Ankh;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArrowBag;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.BulletBelt;
@@ -90,13 +89,10 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfInvisibility;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLiquidFlame;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfMindVision;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfPurity;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfParalyticGas;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfPurity;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfHoneyedHealing;
-import com.shatteredpixel.shatteredpixeldungeon.items.remains.BrokenShield;
-import com.shatteredpixel.shatteredpixeldungeon.items.remains.SheathFragment;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfHaste;
@@ -107,11 +103,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMappi
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRage;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurse;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurse;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRetribution;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
-import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.PinkGem;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.HandyBarricade;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.WildEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfMagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Cudgel;
@@ -126,10 +122,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Shovel;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.TacticalShield;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.Bow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.GreatBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.LongBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.ShortBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.WornShortBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.AR.AR_T1;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.quick.PocketKnife;
@@ -139,8 +131,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingSt
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.watabou.utils.DeviceCompat;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.HandyBarricade;
-//import com.shatteredpixel.shatteredpixeldungeon.items.changer.OldAmulet;
 
 public enum HeroClass {
 
@@ -168,98 +158,77 @@ public enum HeroClass {
 		hero.heroClass = this;
 		Talent.initClassTalents(hero);
 
+		final boolean oneSlot = Dungeon.isChallenged(Challenges.ONE_SLOT_PACK);
+
+		// 기본 갑옷은 장비 슬롯(armor)이라서 허용
 		Item i = new ClothArmor().identify();
 		if (!Challenges.isItemBlocked(i)) hero.belongings.armor = (ClothArmor)i;
 
-		i = new Food();
-		if (!Challenges.isItemBlocked(i)) i.collect();
+		// --------------------------------------------------
+		// 기본 지급 아이템 (ONE_SLOT_PACK에서는 인벤 지급 스킵)
+		// --------------------------------------------------
+		Waterskin waterskin = null;
 
-		new VelvetPouch().collect();
-		Dungeon.LimitedDrops.VELVET_POUCH.drop();
+		if (!oneSlot) {
 
-		Waterskin waterskin = new Waterskin();
-		waterskin.collect();
+			i = new Food();
+			if (!Challenges.isItemBlocked(i)) i.collect();
 
-		new ScrollOfIdentify().identify();
+			new VelvetPouch().collect();
+			Dungeon.LimitedDrops.VELVET_POUCH.drop();
 
+			waterskin = new Waterskin();
+			waterskin.collect();
+
+			new ScrollOfIdentify().identify();
+
+		} else {
+			// “식별됨(지식)”만 주는 용도라면 유지 가능 (원치 않으면 지워도 됨)
+			new ScrollOfIdentify().identify();
+		}
+
+		// 디버그/테스트 시드
 		if (DeviceCompat.isDebug() || SPDSettings.customSeed().contains("test")) {
-			new RingOfMight().identify().upgrade(10).collect();
-			new RingOfEnergy().identify().upgrade(20).collect();
-			new RingOfHaste().identify().upgrade(100).collect();
-			new RingOfAccuracy().identify().upgrade(100).collect();
-			new AlchemistsToolkit().identify().upgrade(10).collect();
-			new ElixirOfHoneyedHealing().identify().quantity(500).collect();
-			new PlateArmor().identify().upgrade(100).collect();
-			new TacticalShield().identify().upgrade(100).collect();
-			new Teleporter().collect();
-			new TengusMask().collect();
-			new KingsCrown().collect();
-			new OldAmulet().collect();
-			new HandyBarricade().identify().quantity(20).collect();
-//			new BrokenShield().collect();
-//			new PinkGem().collect();
-//			new Ankh().collect();
-//			new PotionOfLiquidFlame().identify().quantity(100).collect();
-//			new SheathFragment().quantity(20).collect();
-//			new BulletBelt().collect();
-//			new WornShortBow().identify().collect();
-//			new ShortBow().identify().collect();
-//			new Bow().identify().collect();
-//			new LongBow().identify().collect();
-//			new GreatBow().identify().collect();
+
+		    // 나머지 디버그 아이템은 기존처럼 collect 유지 가능
+		    new RingOfMight().identify().upgrade(10).collect();
+		    new RingOfEnergy().identify().upgrade(20).collect();
+		    new RingOfHaste().identify().upgrade(100).collect();
+		    new RingOfAccuracy().identify().upgrade(100).collect();
+		    new AlchemistsToolkit().identify().upgrade(10).collect();
+		    new ElixirOfHoneyedHealing().identify().quantity(500).collect();
+		    new PlateArmor().identify().upgrade(100).collect();
+		    new TacticalShield().identify().upgrade(100).collect();
+		    new Teleporter().collect();
+
+		    new TengusMask().collect();
+		    new KingsCrown().collect();
+		    new OldAmulet().collect();
+
+		    new HandyBarricade().identify().quantity(20).collect();
+		    new WildEnergy().identify().quantity(20).collect();
 		}
 
+		// --------------------------------------------------
+		// 클래스별 초기화
+		// --------------------------------------------------
 		switch (this) {
-			case WARRIOR:
-				initWarrior( hero );
-				break;
-
-			case MAGE:
-				initMage( hero );
-				break;
-
-			case ROGUE:
-				initRogue( hero );
-				break;
-
-			case HUNTRESS:
-				initHuntress( hero );
-				break;
-
-			case DUELIST:
-				initDuelist( hero );
-				break;
-
-			case CLERIC:
-				initCleric( hero );
-				break;
-
-			case GUNNER:
-				initGunner( hero );
-				break;
-
-			case SAMURAI:
-				initSamurai( hero );
-				break;
-
-			case ADVENTURER:
-				initAdventurer( hero );
-				break;
-
-			case KNIGHT:
-				initKnight( hero );
-				break;
-
-			case MEDIC:
-				initMedic( hero );
-				break;
-
-			case ARCHER:
-				initArcher( hero );
-				break;
+			case WARRIOR:    initWarrior(hero, oneSlot); break;
+			case MAGE:       initMage(hero, oneSlot); break;
+			case ROGUE:      initRogue(hero, oneSlot); break;
+			case HUNTRESS:   initHuntress(hero, oneSlot); break;
+			case DUELIST:    initDuelist(hero, oneSlot); break;
+			case CLERIC:     initCleric(hero, oneSlot); break;
+			case GUNNER:     initGunner(hero, oneSlot); break;
+			case SAMURAI:    initSamurai(hero, oneSlot); break;
+			case ADVENTURER: initAdventurer(hero, oneSlot); break;
+			case KNIGHT:     initKnight(hero, oneSlot); break;
+			case MEDIC:      initMedic(hero, oneSlot); break;
+			case ARCHER:     initArcher(hero, oneSlot); break;
 		}
 
-		if (SPDSettings.quickslotWaterskin()) {
+		// 물통 퀵슬롯 (ONE_SLOT_PACK에서는 인벤 자체가 제한이니 스킵)
+		if (!oneSlot && SPDSettings.quickslotWaterskin() && waterskin != null) {
 			for (int s = 0; s < QuickSlot.SIZE; s++) {
 				if (Dungeon.quickslot.getItem(s) == null) {
 					Dungeon.quickslot.setSlot(s, waterskin);
@@ -268,58 +237,143 @@ public enum HeroClass {
 			}
 		}
 
+		// --------------------------------------------------
+		// ONE_SLOT_PACK: 시작 인벤을 "첫칸 1개"로 강제
+		// --------------------------------------------------
+		if (oneSlot) {
+			applyOneSlotPackStarter(hero);
+		}
+
+		// 마지막으로 장비 규칙 강제(artifact/ring 슬롯에 남는 것 방지)
+		if (oneSlot) {
+			hero.belongings.enforceOneSlotPackEquipmentRule();
+		}
 	}
 
-	public Badges.Badge masteryBadge() {
-		switch (this) {
-			case WARRIOR:
-				return Badges.Badge.MASTERY_WARRIOR;
-			case MAGE:
-				return Badges.Badge.MASTERY_MAGE;
-			case ROGUE:
-				return Badges.Badge.MASTERY_ROGUE;
-			case HUNTRESS:
-				return Badges.Badge.MASTERY_HUNTRESS;
-			case DUELIST:
-				return Badges.Badge.MASTERY_DUELIST;
-			case CLERIC:
-				return Badges.Badge.MASTERY_CLERIC;
-			case GUNNER:
-				return Badges.Badge.MASTERY_GUNNER;
-			case SAMURAI:
-				return Badges.Badge.MASTERY_SAMURAI;
-			case ADVENTURER:
-				return Badges.Badge.MASTERY_ADVENTURER;
-			case KNIGHT:
-				return Badges.Badge.MASTERY_KNIGHT;
-			case MEDIC:
-				return Badges.Badge.MASTERY_MEDIC;
-			case ARCHER:
-				return Badges.Badge.MASTERY_ARCHER;
+	// =========================================================
+	// ONE_SLOT_PACK 스타터: 배낭 첫 칸(0번)에 전용 아이템 1개만
+	// =========================================================
+	private static void applyOneSlotPackStarter(Hero hero) {
+
+		if (hero == null || hero.belongings == null || hero.belongings.backpack == null) return;
+
+		// 1) 배낭 완전 비우기
+		hero.belongings.backpack.items.clear();
+
+		// 2) 퀵슬롯 완전 초기화 (QuickSlot 클래스에 clearAll이 없어서 reset 사용)
+		Dungeon.quickslot.reset();
+
+		// 3) 클래스 전용 스타터 생성
+		Item starter = makeOneSlotStarterItem(hero.heroClass);
+		if (starter == null) return;
+
+		starter.identify();
+		starter.collect();
+
+		// 배낭 첫 칸 보장
+		if (hero.belongings.backpack.items.contains(starter)) {
+			hero.belongings.backpack.items.remove(starter);
+			hero.belongings.backpack.items.add(0, starter);
+		}
+	}
+
+	private static Item makeOneSlotStarterItem(HeroClass hc) {
+
+		// Bag류는 절대 지급하지 않음(챌린지에서 가방류 금지)
+		switch (hc) {
+
+			case WARRIOR: {
+				ThrowingStone stones = new ThrowingStone();
+				stones.identify();
+				return stones;
+			}
+
+			case MAGE: {
+				ScrollOfUpgrade sc = new ScrollOfUpgrade();
+				sc.identify();
+				return sc;
+			}
+
+			case ROGUE: {
+				ThrowingKnife knives = new ThrowingKnife();
+				knives.identify();
+				return knives;
+			}
+
+			case HUNTRESS: {
+				SpiritBow bow = new SpiritBow();
+				bow.identify();
+				return bow;
+			}
+
+			case DUELIST: {
+				ThrowingSpike spikes = new ThrowingSpike();
+				spikes.quantity(2).identify();
+				return spikes;
+			}
+
+			case CLERIC: {
+				ScrollOfRemoveCurse sc = new ScrollOfRemoveCurse();
+				sc.identify();
+				return sc;
+			}
+
+			case GUNNER: {
+				BulletBelt belt = new BulletBelt();
+				belt.quantity(5);
+				return belt;
+			}
+
+			case SAMURAI: {
+				return new Sheath();
+			}
+
+			case ADVENTURER: {
+				Machete machete = new Machete();
+				machete.identify();
+				return machete;
+			}
+
+			case KNIGHT: {
+				return new KnightsShield();
+			}
+
+			case MEDIC: {
+				return new GammaRayGun();
+			}
+
+			case ARCHER: {
+				PocketKnife knife = new PocketKnife();
+				knife.identify();
+				return knife;
+			}
 		}
 		return null;
 	}
 
-	private static void initWarrior( Hero hero ) {
+	// =========================================================
+	// 클래스별 init (oneSlot에 따라 인벤 지급/퀵슬롯 최소화)
+	// =========================================================
+	private static void initWarrior( Hero hero, boolean oneSlot ) {
 		(hero.belongings.weapon = new WornShortsword()).identify();
-		ThrowingStone stones = new ThrowingStone();
-		stones.identify().collect();
 
-		Dungeon.quickslot.setSlot(0, stones);
+		if (!oneSlot) {
+			ThrowingStone stones = new ThrowingStone();
+			stones.identify().collect();
+			Dungeon.quickslot.setSlot(0, stones);
+		}
 
 		if (hero.belongings.armor != null){
 			hero.belongings.armor.affixSeal(new BrokenSeal());
-			Catalog.setSeen(BrokenSeal.class); //as it's not added to the inventory
+			Catalog.setSeen(BrokenSeal.class);
 		}
 
 		new PotionOfHealing().identify();
 		new ScrollOfRage().identify();
 	}
 
-	private static void initMage( Hero hero ) {
-		MagesStaff staff;
-
-		staff = new MagesStaff(new WandOfMagicMissile());
+	private static void initMage( Hero hero, boolean oneSlot ) {
+		MagesStaff staff = new MagesStaff(new WandOfMagicMissile());
 
 		(hero.belongings.weapon = staff).identify();
 		hero.belongings.weapon.activate(hero);
@@ -330,73 +384,80 @@ public enum HeroClass {
 		new PotionOfLiquidFlame().identify();
 	}
 
-	private static void initRogue( Hero hero ) {
+	private static void initRogue( Hero hero, boolean oneSlot ) {
 		(hero.belongings.weapon = new Dagger()).identify();
 
 		CloakOfShadows cloak = new CloakOfShadows();
-		(hero.belongings.artifact = cloak).identify();
-		hero.belongings.artifact.activate( hero );
+		cloak.identify();
 
-		ThrowingKnife knives = new ThrowingKnife();
-		knives.identify().collect();
+		if (oneSlot) {
+			// ONE_SLOT_PACK: artifact 슬롯 금지 -> misc 슬롯로 착용
+			hero.belongings.misc = cloak;
+			hero.belongings.misc.activate(hero);
+		} else {
+			(hero.belongings.artifact = cloak).identify();
+			hero.belongings.artifact.activate(hero);
+		}
+
+		if (!oneSlot) {
+			ThrowingKnife knives = new ThrowingKnife();
+			knives.identify().collect();
+			Dungeon.quickslot.setSlot(1, knives);
+		}
 
 		Dungeon.quickslot.setSlot(0, cloak);
-		Dungeon.quickslot.setSlot(1, knives);
 
 		new ScrollOfMagicMapping().identify();
 		new PotionOfInvisibility().identify();
 	}
 
-	private static void initHuntress( Hero hero ) {
+	private static void initHuntress( Hero hero, boolean oneSlot ) {
 
 		(hero.belongings.weapon = new Gloves()).identify();
-		SpiritBow bow = new SpiritBow();
-		bow.identify().collect();
 
-		Dungeon.quickslot.setSlot(0, bow);
+		if (!oneSlot) {
+			SpiritBow bow = new SpiritBow();
+			bow.identify().collect();
+			Dungeon.quickslot.setSlot(0, bow);
+		}
 
 		new PotionOfMindVision().identify();
 		new ScrollOfLullaby().identify();
 	}
 
-	private static void initDuelist( Hero hero ) {
+	private static void initDuelist( Hero hero, boolean oneSlot ) {
 
 		(hero.belongings.weapon = new Rapier()).identify();
 		hero.belongings.weapon.activate(hero);
 
-		ThrowingSpike spikes = new ThrowingSpike();
-		spikes.quantity(2).identify().collect(); //set quantity is 3, but Duelist starts with 2
+		if (!oneSlot) {
+			ThrowingSpike spikes = new ThrowingSpike();
+			spikes.quantity(2).identify().collect();
+			Dungeon.quickslot.setSlot(1, spikes);
+		}
 
 		Dungeon.quickslot.setSlot(0, hero.belongings.weapon);
-		Dungeon.quickslot.setSlot(1, spikes);
 
 		new PotionOfStrength().identify();
 		new ScrollOfMirrorImage().identify();
 	}
 
-	private static void initCleric( Hero hero ) {
+	private static void initCleric( Hero hero, boolean oneSlot ) {
 
 		(hero.belongings.weapon = new Cudgel()).identify();
 		hero.belongings.weapon.activate(hero);
-		/*****for test*********
-		Cudgel w = new Cudgel();
-		w.level(99); // 테스트용: +2 (원하면 1~3 정도)
-		(hero.belongings.weapon = w).identify();
-		hero.belongings.weapon.activate(hero);
-
-		ClothArmor a = new ClothArmor();
-		a.level(99);
-		(hero.belongings.armor = a).identify();
-		hero.belongings.armor.activate(hero);
-		
-		OldAmulet oldAmulet = new OldAmulet();
-		oldAmulet.collect();
-		/**************/
-		
 
 		HolyTome tome = new HolyTome();
-		(hero.belongings.artifact = tome).identify();
-		hero.belongings.artifact.activate( hero );
+		tome.identify();
+
+		if (oneSlot) {
+			// ONE_SLOT_PACK: artifact 슬롯 금지 -> misc 슬롯로 착용
+			hero.belongings.misc = tome;
+			hero.belongings.misc.activate(hero);
+		} else {
+			(hero.belongings.artifact = tome).identify();
+			hero.belongings.artifact.activate(hero);
+		}
 
 		Dungeon.quickslot.setSlot(0, tome);
 
@@ -404,114 +465,168 @@ public enum HeroClass {
 		new ScrollOfRemoveCurse().identify();
 	}
 
-	private static void initGunner( Hero hero ) {
+	private static void initGunner( Hero hero, boolean oneSlot ) {
+
 		(hero.belongings.weapon = new AR_T1()).identify();
 		hero.belongings.weapon.activate(hero);
 
-		BulletBelt bulletBelt = new BulletBelt();
-		bulletBelt.quantity(5).collect();
+		if (!oneSlot) {
+			BulletBelt bulletBelt = new BulletBelt();
+			bulletBelt.quantity(5).collect();
 
-		PocketKnife pocketKnife = new PocketKnife();
-		pocketKnife.identify().collect();
+			PocketKnife pocketKnife = new PocketKnife();
+			pocketKnife.identify().collect();
+
+			Dungeon.quickslot.setSlot(1, pocketKnife);
+			Dungeon.quickslot.setSlot(2, bulletBelt);
+		}
 
 		Dungeon.quickslot.setSlot(0, hero.belongings.weapon);
-		Dungeon.quickslot.setSlot(1, pocketKnife);
-		Dungeon.quickslot.setSlot(2, bulletBelt);
 
 		new PotionOfHaste().identify();
 		new ScrollOfTeleportation().identify();
 	}
 
-	private static void initSamurai( Hero hero ) {
+	private static void initSamurai( Hero hero, boolean oneSlot ) {
 
 		WornKatana wornKatana = new WornKatana();
 		(hero.belongings.weapon = wornKatana).identify();
 
-		Sheath sheath = new Sheath();
-		sheath.collect();
+		if (!oneSlot) {
+			Sheath sheath = new Sheath();
+			sheath.collect();
 
-		ThrowingKnife knives = new ThrowingKnife();
-		knives.identify().collect();
+			ThrowingKnife knives = new ThrowingKnife();
+			knives.identify().collect();
 
-		Dungeon.quickslot.setSlot(0, sheath);
-		Dungeon.quickslot.setSlot(1, knives);
+			Dungeon.quickslot.setSlot(0, sheath);
+			Dungeon.quickslot.setSlot(1, knives);
+		}
 
 		new ScrollOfRetribution().identify();
 		new PotionOfStrength().identify();
 	}
 
-	private static void initAdventurer( Hero hero ) {
+	private static void initAdventurer( Hero hero, boolean oneSlot ) {
+
 		Shovel shovel = new Shovel();
 		(hero.belongings.weapon = shovel).identify();
 		hero.belongings.weapon.activate(hero);
 
-		Machete machete = new Machete();
-		machete.identify().collect();
+		if (!oneSlot) {
+			Machete machete = new Machete();
+			machete.identify().collect();
 
-		ThrowingStone stones = new ThrowingStone();
-		stones.identify().collect();
+			ThrowingStone stones = new ThrowingStone();
+			stones.identify().collect();
+
+			Dungeon.quickslot.setSlot(1, machete);
+			Dungeon.quickslot.setSlot(2, stones);
+		}
 
 		Dungeon.quickslot.setSlot(0, shovel);
-		Dungeon.quickslot.setSlot(1, machete);
-		Dungeon.quickslot.setSlot(2, stones);
 
 		new ScrollOfMagicMapping().identify();
 		new PotionOfPurity().identify();
 	}
 
-	private static void initKnight( Hero hero ) {
+	private static void initKnight( Hero hero, boolean oneSlot ) {
+
 		Saber saber = new Saber();
 		(hero.belongings.weapon = saber).identify();
 		hero.belongings.weapon.activate(hero);
-		KnightsShield shield = new KnightsShield();
-		shield.collect();
-		ThrowingStone stones = new ThrowingStone();
-		stones.identify().collect();
-		Dungeon.quickslot.setSlot(0, stones);
+
+		if (!oneSlot) {
+			KnightsShield shield = new KnightsShield();
+			shield.collect();
+
+			ThrowingStone stones = new ThrowingStone();
+			stones.identify().collect();
+
+			Dungeon.quickslot.setSlot(0, stones);
+		}
 
 		new ScrollOfRemoveCurse().identify();
 		new PotionOfParalyticGas().identify();
 	}
 
-	private static void initMedic( Hero hero ) {
+	private static void initMedic( Hero hero, boolean oneSlot ) {
+
 		Scalpel scalpel = new Scalpel();
 		(hero.belongings.weapon = scalpel).identify();
 		hero.belongings.weapon.activate(hero);
 
-		GammaRayGun gammaRayGun = new GammaRayGun();
-		gammaRayGun.collect();
-		Dungeon.quickslot.setSlot(0, gammaRayGun);
-
 		MedicKit kit = new MedicKit();
-		(hero.belongings.artifact = kit).identify();
-		hero.belongings.artifact.activate( hero );
-		Dungeon.quickslot.setSlot(1, kit);
+		kit.identify();
+
+		if (oneSlot) {
+			// ONE_SLOT_PACK: artifact 슬롯 금지 -> misc 슬롯로 착용
+			hero.belongings.misc = kit;
+			hero.belongings.misc.activate(hero);
+		} else {
+			(hero.belongings.artifact = kit).identify();
+			hero.belongings.artifact.activate(hero);
+		}
+
+		if (!oneSlot) {
+			GammaRayGun gammaRayGun = new GammaRayGun();
+			gammaRayGun.collect();
+			Dungeon.quickslot.setSlot(0, gammaRayGun);
+			Dungeon.quickslot.setSlot(1, kit);
+		} else {
+			Dungeon.quickslot.setSlot(0, kit);
+		}
 
 		new ScrollOfMirrorImage().identify();
 		new PotionOfHealing().identify();
 	}
 
-	private static void initArcher( Hero hero ) {
+	private static void initArcher( Hero hero, boolean oneSlot ) {
+
 		WornShortBow bow = new WornShortBow();
 		(hero.belongings.weapon = bow).identify();
 		hero.belongings.weapon.activate(hero);
 
-		PocketKnife pocketKnife = new PocketKnife();
-		pocketKnife.identify().collect();
+		if (!oneSlot) {
+			PocketKnife pocketKnife = new PocketKnife();
+			pocketKnife.identify().collect();
 
-		BulletBelt bulletBelt = new BulletBelt();
-		bulletBelt.quantity(3).collect();
+			BulletBelt bulletBelt = new BulletBelt();
+			bulletBelt.quantity(3).collect();
 
-		ArrowBag arrowBag = new ArrowBag();
-		arrowBag.collect();
+			ArrowBag arrowBag = new ArrowBag();
+			arrowBag.collect();
+
+			Dungeon.quickslot.setSlot(1, pocketKnife);
+			Dungeon.quickslot.setSlot(2, arrowBag);
+			Dungeon.quickslot.setSlot(3, bulletBelt);
+		}
 
 		Dungeon.quickslot.setSlot(0, hero.belongings.weapon);
-		Dungeon.quickslot.setSlot(1, pocketKnife);
-		Dungeon.quickslot.setSlot(2, arrowBag);
-		Dungeon.quickslot.setSlot(3, bulletBelt);
 
 		new ScrollOfMagicMapping().identify();
 		new PotionOfHaste().identify();
+	}
+
+	// =========================================================
+	// UI/설명/언락 등 기존 코드
+	// =========================================================
+	public Badges.Badge masteryBadge() {
+		switch (this) {
+			case WARRIOR:    return Badges.Badge.MASTERY_WARRIOR;
+			case MAGE:       return Badges.Badge.MASTERY_MAGE;
+			case ROGUE:      return Badges.Badge.MASTERY_ROGUE;
+			case HUNTRESS:   return Badges.Badge.MASTERY_HUNTRESS;
+			case DUELIST:    return Badges.Badge.MASTERY_DUELIST;
+			case CLERIC:     return Badges.Badge.MASTERY_CLERIC;
+			case GUNNER:     return Badges.Badge.MASTERY_GUNNER;
+			case SAMURAI:    return Badges.Badge.MASTERY_SAMURAI;
+			case ADVENTURER: return Badges.Badge.MASTERY_ADVENTURER;
+			case KNIGHT:     return Badges.Badge.MASTERY_KNIGHT;
+			case MEDIC:      return Badges.Badge.MASTERY_MEDIC;
+			case ARCHER:     return Badges.Badge.MASTERY_ARCHER;
+		}
+		return null;
 	}
 
 	public String title() {
@@ -561,96 +676,58 @@ public enum HeroClass {
 
 	public String spritesheet() {
 		switch (this) {
-			case WARRIOR: default:
-				return Assets.Sprites.WARRIOR;
-			case MAGE:
-				return Assets.Sprites.MAGE;
-			case ROGUE:
-				return Assets.Sprites.ROGUE;
-			case HUNTRESS:
-				return Assets.Sprites.HUNTRESS;
-			case DUELIST:
-				return Assets.Sprites.DUELIST;
-			case CLERIC:
-				return Assets.Sprites.CLERIC;
-			case GUNNER:
-				return Assets.Sprites.GUNNER;
-			case SAMURAI:
-				return Assets.Sprites.SAMURAI;
-			case ADVENTURER:
-				return Assets.Sprites.ADVENTURER;
-			case KNIGHT:
-				return Assets.Sprites.KNIGHT;
-			case MEDIC:
-				return Assets.Sprites.MEDIC;
-			case ARCHER:
-				return Assets.Sprites.ARCHER;
+			case WARRIOR: default: return Assets.Sprites.WARRIOR;
+			case MAGE:            return Assets.Sprites.MAGE;
+			case ROGUE:           return Assets.Sprites.ROGUE;
+			case HUNTRESS:        return Assets.Sprites.HUNTRESS;
+			case DUELIST:         return Assets.Sprites.DUELIST;
+			case CLERIC:          return Assets.Sprites.CLERIC;
+			case GUNNER:          return Assets.Sprites.GUNNER;
+			case SAMURAI:         return Assets.Sprites.SAMURAI;
+			case ADVENTURER:      return Assets.Sprites.ADVENTURER;
+			case KNIGHT:          return Assets.Sprites.KNIGHT;
+			case MEDIC:           return Assets.Sprites.MEDIC;
+			case ARCHER:          return Assets.Sprites.ARCHER;
 		}
 	}
 
 	public String splashArt(){
 		switch (this) {
-			case WARRIOR: default:
-				return Assets.Splashes.WARRIOR;
-			case MAGE:
-				return Assets.Splashes.MAGE;
-			case ROGUE:
-				return Assets.Splashes.ROGUE;
-			case HUNTRESS:
-				return Assets.Splashes.HUNTRESS;
-			case DUELIST:
-				return Assets.Splashes.DUELIST;
-			case CLERIC:
-				return Assets.Splashes.CLERIC;
-			case GUNNER:
-				return Assets.Splashes.GUNNER;
-			case SAMURAI:
-				return Assets.Splashes.SAMURAI;
-			case ADVENTURER:
-				return Assets.Splashes.ADVENTURER;
-			case KNIGHT:
-				return Assets.Splashes.KNIGHT;
-			case MEDIC:
-				return Assets.Splashes.MEDIC;
-			case ARCHER:
-				return Assets.Splashes.ARCHER;
+			case WARRIOR: default: return Assets.Splashes.WARRIOR;
+			case MAGE:            return Assets.Splashes.MAGE;
+			case ROGUE:           return Assets.Splashes.ROGUE;
+			case HUNTRESS:        return Assets.Splashes.HUNTRESS;
+			case DUELIST:         return Assets.Splashes.DUELIST;
+			case CLERIC:          return Assets.Splashes.CLERIC;
+			case GUNNER:          return Assets.Splashes.GUNNER;
+			case SAMURAI:         return Assets.Splashes.SAMURAI;
+			case ADVENTURER:      return Assets.Splashes.ADVENTURER;
+			case KNIGHT:          return Assets.Splashes.KNIGHT;
+			case MEDIC:           return Assets.Splashes.MEDIC;
+			case ARCHER:          return Assets.Splashes.ARCHER;
 		}
 	}
-	
+
 	public boolean isUnlocked(){
-		//always unlock on debug builds
 		if (DeviceCompat.isDebug()) return true;
 
 		switch (this){
-			case WARRIOR: default:
-				return true;
-			case MAGE:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_MAGE);
-			case ROGUE:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_ROGUE);
-			case HUNTRESS:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_HUNTRESS);
-			case DUELIST:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_DUELIST);
-			case CLERIC:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_CLERIC);
-			case GUNNER:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_GUNNER);
-			case SAMURAI:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_SAMURAI);
-			case ADVENTURER:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_ADVENTURER);
-			case KNIGHT:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_KNIGHT);
-			case MEDIC:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_MEDIC);
-			case ARCHER:
-				return Badges.isUnlocked(Badges.Badge.UNLOCK_ARCHER);
+			case WARRIOR: default: return true;
+			case MAGE:            return Badges.isUnlocked(Badges.Badge.UNLOCK_MAGE);
+			case ROGUE:           return Badges.isUnlocked(Badges.Badge.UNLOCK_ROGUE);
+			case HUNTRESS:        return Badges.isUnlocked(Badges.Badge.UNLOCK_HUNTRESS);
+			case DUELIST:         return Badges.isUnlocked(Badges.Badge.UNLOCK_DUELIST);
+			case CLERIC:          return Badges.isUnlocked(Badges.Badge.UNLOCK_CLERIC);
+			case GUNNER:          return Badges.isUnlocked(Badges.Badge.UNLOCK_GUNNER);
+			case SAMURAI:         return Badges.isUnlocked(Badges.Badge.UNLOCK_SAMURAI);
+			case ADVENTURER:      return Badges.isUnlocked(Badges.Badge.UNLOCK_ADVENTURER);
+			case KNIGHT:          return Badges.isUnlocked(Badges.Badge.UNLOCK_KNIGHT);
+			case MEDIC:           return Badges.isUnlocked(Badges.Badge.UNLOCK_MEDIC);
+			case ARCHER:          return Badges.isUnlocked(Badges.Badge.UNLOCK_ARCHER);
 		}
 	}
-	
+
 	public String unlockMsg() {
 		return shortDesc() + "\n\n" + Messages.get(HeroClass.class, name()+"_unlock");
 	}
-
 }

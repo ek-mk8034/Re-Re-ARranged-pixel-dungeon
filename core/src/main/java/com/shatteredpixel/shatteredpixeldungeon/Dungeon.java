@@ -48,6 +48,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Amulet;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.KingsCrown;
+import com.shatteredpixel.shatteredpixeldungeon.items.TengusMask;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
 import com.shatteredpixel.shatteredpixeldungeon.items.changer.OldAmulet;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
@@ -303,6 +305,7 @@ public class Dungeon {
 		Badges.reset();
 		
 		GamesInProgress.selectedClass.initHero( hero );
+//		debugSpawnedFloor1Loot = false;
 	}
 
 	public static boolean isChallenged( int mask ) {
@@ -507,7 +510,29 @@ public class Dungeon {
 		}
 		return true;
 	}
-	
+/*
+	private static boolean debugSpawnedFloor1Loot = false;
+
+	private static void spawnDebugLootOnFloor1() {
+	    if (debugSpawnedFloor1Loot) return;
+
+	    // 디버그/테스트 시드일 때만
+	    if (!(DeviceCompat.isDebug() || SPDSettings.customSeed().contains("test"))) return;
+
+	    // 1층(본선 branch=0)에서만
+	    if (branch != 0 || depth != 1) return;
+
+	    if (level == null || hero == null) return;
+
+	    int p = hero.pos; // 영웅 발밑 (원하면 level.entrance()로 바꿔도 됨)
+
+	    level.drop(new TengusMask(), p);
+	    level.drop(new KingsCrown(), p);
+	    level.drop(new OldAmulet(),  p);
+
+	    debugSpawnedFloor1Loot = true;
+	}
+*/	
 	public static void switchLevel( final Level level, int pos ) {
 
 		//Position of -2 specifically means trying to place the hero the exit
@@ -526,6 +551,8 @@ public class Dungeon {
 		
 		Dungeon.level = level;
 		hero.pos = pos;
+
+/*		spawnDebugLootOnFloor1();*/
 
 		if (hero.buff(AscensionChallenge.class) != null){
 			hero.buff(AscensionChallenge.class).onLevelSwitch();

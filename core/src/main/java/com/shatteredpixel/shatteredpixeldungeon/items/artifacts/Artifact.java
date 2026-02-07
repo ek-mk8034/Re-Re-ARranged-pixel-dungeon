@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.artifacts;
 
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
@@ -34,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.GuidingLight;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindofMisc;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
@@ -63,29 +65,85 @@ public class Artifact extends KindofMisc {
 	protected int cooldown = 0;
 
 	@Override
-	public boolean doEquip( final Hero hero ) {
+	public boolean doEquip(final Hero hero) {
 
-		if ((hero.belongings.artifact != null && hero.belongings.artifact.getClass() == this.getClass())
-				|| (hero.belongings.misc != null && hero.belongings.misc.getClass() == this.getClass())){
+	    // 같은 유물 중복 착용 방지: artifact 슬롯/ misc 슬롯 둘 다 검사
+	    if ((hero.belongings.artifact != null && hero.belongings.artifact.getClass() == this.getClass())
+	            || (hero.belongings.misc != null && hero.belongings.misc.getClass() == this.getClass())) {
 
-			GLog.w( Messages.get(Artifact.class, "cannot_wear_two") );
-			return false;
+	        GLog.w(Messages.get(Artifact.class, "cannot_wear_two"));
+	        return false;
+	    }
 
-		} else {
+	    // ---------------------------------------------------------
+	    // ONE_SLOT_PACK: artifact 슬롯은 사용 금지 -> misc 슬롯으로만 장착
+	    // ---------------------------------------------------------
+	    if (Dungeon.isChallenged(Challenges.ONE_SLOT_PACK)) {
 
-			if (super.doEquip( hero )){
+	        // 혹시 기존에 artifact 슬롯에 뭔가 남아있으면 정리(안전장치)
+	        hero.belongings.enforceOneSlotPackEquipmentRule();
 
-				identify();
-				return true;
+	        // ---------------------------------------------------------
+	        // ★ 핵심: 교체(unequip) 전에 this(유물)를 인벤에서 먼저 빼서
+	        //        배낭 1칸을 "비워야" 기존 misc가 바닥으로 떨어지지 않는다.
+	        // ---------------------------------------------------------
+	        for (Bag b : hero.belongings.getBags()) {
+	            detachAll(b);
+	            b.items.remove(this);
+	        }
 
-			} else {
+	        // misc 슬롯에 이미 다른 장비가 있으면 해제 시도
+	        if (hero.belongings.misc != null && hero.belongings.misc != this) {
 
-				return false;
+	            // 기존 misc가 저주 등으로 해제가 불가능하면 장착 실패
+	            if (!hero.belongings.misc.doUnequip(hero, true, false)) {
 
-			}
+	                // 실패 시: 방금 인벤에서 빼둔 this를 다시 배낭 1칸으로 복구
+	                this.collect(hero.belongings.backpack);
 
-		}
+	                GLog.w(Messages.get(Artifact.class, "cant_do_that"));
+	                return false;
+	            }
+	        }
 
+	        // 이미 misc에 장착된 상태면 성공 처리 (혹시 인벤에 남아있던 건 위에서 이미 제거됨)
+	        if (hero.belongings.misc == this) {
+	            identify();
+	            updateQuickslot();
+	            hero.belongings.enforceOneSlotPackEquipmentRule();
+	            return true;
+	        }
+
+	        // 실제 장착: misc 슬롯에 꽂고 활성화
+	        hero.belongings.misc = this;
+	        activate(hero);
+
+	        identify();
+	        updateQuickslot();
+
+	        // ONE_SLOT 룰 재확인(artifact/ring에 들어가는 걸 완전 방지)
+	        hero.belongings.enforceOneSlotPackEquipmentRule();
+
+	        return true;
+	    }
+
+	    // ---------------------------------------------------------
+	    // 기본(챌린지 아닐 때): 기존 로직 유지 + 인벤 제거 보강
+	    // ---------------------------------------------------------
+	    if (super.doEquip(hero)) {
+
+	        // ★ 기본에서도 혹시라도 어떤 가방에 남아있으면 제거
+	        for (Bag b : hero.belongings.getBags()) {
+	            detachAll(b);
+	            b.items.remove(this);
+	        }
+
+	        identify();
+	        return true;
+
+	    } else {
+	        return false;
+	    }
 	}
 
 	public void activate( Char ch ) {

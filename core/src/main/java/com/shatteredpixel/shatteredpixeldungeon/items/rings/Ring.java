@@ -25,6 +25,7 @@ import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -65,6 +66,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.ItemStatusHandler;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindofMisc;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.TelekineticGrab;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
@@ -93,8 +95,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 
+
 public class Ring extends KindofMisc {
-	
+
 	protected Buff buff;
 	protected Class<? extends RingBuff> buffClass;
 
@@ -143,14 +146,14 @@ public class Ring extends KindofMisc {
 		ringTypes.put(RingOfTenacity.class, 		RING_TENACITY  		);
 		ringTypes.put(RingOfWealth.class,			RING_WEALTH			);
 	}
-	
+
 	private static ItemStatusHandler<Ring> handler;
-	
+
 	private String gem;
-	
+
 	//rings cannot be 'used' like other equipment, so they ID purely based on exp
 	private float levelsToID = 1;
-	
+
 	@SuppressWarnings("unchecked")
 	public static void initGems() {
 		handler = new ItemStatusHandler<>( (Class<? extends Ring>[])Generator.Category.RING.classes, gems );
@@ -159,7 +162,7 @@ public class Ring extends KindofMisc {
 	public static void clearGems(){
 		handler = null;
 	}
-	
+
 	public static void save( Bundle bundle ) {
 		handler.save( bundle );
 	}
@@ -167,12 +170,12 @@ public class Ring extends KindofMisc {
 	public static void saveSelectively( Bundle bundle, ArrayList<Item> items ) {
 		handler.saveSelectively( bundle, items );
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static void restore( Bundle bundle ) {
 		handler = new ItemStatusHandler<>( (Class<? extends Ring>[])Generator.Category.RING.classes, gems, bundle );
 	}
-	
+
 	public Ring() {
 		super();
 		reset();
@@ -186,7 +189,7 @@ public class Ring extends KindofMisc {
 		if (!isKnown()) image = ItemSpriteSheet.RING_HOLDER;
 		anonymous = true;
 	}
-	
+
 	public void reset() {
 		super.reset();
 		levelsToID = 1;
@@ -198,7 +201,7 @@ public class Ring extends KindofMisc {
 			gem = "garnet";
 		}
 	}
-	
+
 	public void activate( Char ch ) {
 		if (buff != null){
 			buff.detach();
@@ -206,6 +209,71 @@ public class Ring extends KindofMisc {
 		}
 		buff = buff();
 		buff.attachTo( ch );
+	}
+
+	// =========================================================
+	// ONE_SLOT_PACK: ring 슬롯 봉인 + misc 슬롯로만 장착
+	// =========================================================
+	@Override
+	public boolean doEquip(final Hero hero) {
+
+	    // ONE_SLOT_PACK에서 ring 슬롯을 쓰면 안 되고, misc 슬롯만 쓰게 만들고 싶다면
+	    // 여기서 강제로 misc로 보낸다.
+	    if (Dungeon.isChallenged(Challenges.ONE_SLOT_PACK)) {
+
+	        // 안전장치: 규칙 위반 장착 정리
+	        if (hero.belongings != null) {
+	            hero.belongings.enforceOneSlotPackEquipmentRule();
+	        }
+
+	        // ---------------------------------------------------------
+	        // ★ 핵심: 교체(unequip) 전에 this(링)를 인벤에서 먼저 빼서
+	        //        배낭 1칸을 "비워야" 기존 misc가 바닥으로 떨어지지 않는다.
+	        // ---------------------------------------------------------
+	        if (hero.belongings != null) {
+	            for (Bag b : hero.belongings.getBags()) {
+	                detachAll(b);
+	                b.items.remove(this);
+	            }
+	        }
+
+	        // misc가 이미 차있으면 해제 시도 (이제 배낭 1칸이 비었으므로 인벤으로 들어가야 정상)
+	        if (hero.belongings.misc != null && hero.belongings.misc != this) {
+	            if (!hero.belongings.misc.doUnequip(hero, true, false)) {
+
+	                // 기존 misc가 저주 등으로 해제 불가면,
+	                // 방금 빼둔 this를 다시 인벤(배낭 1칸)으로 돌려놓고 실패 처리
+	                this.collect(hero.belongings.backpack);
+
+	                GLog.w(Messages.get(Ring.class, "cursed_worn")); // 메시지 키는 너 프로젝트에 맞게
+	                return false;
+	            }
+	        }
+
+	        // misc에 장착
+	        hero.belongings.misc = this;
+	        activate(hero);
+
+	        updateQuickslot();
+	        hero.belongings.enforceOneSlotPackEquipmentRule();
+	        return true;
+	    }
+
+	    // 기본 게임(챌린지 아닐 때): 부모 장착 로직 그대로
+	    if (super.doEquip(hero)) {
+
+	        // ★ 기본에서도 혹시라도 남아있으면 제거
+	        if (hero.belongings != null) {
+	            for (Bag b : hero.belongings.getBags()) {
+	                detachAll(b);
+	                b.items.remove(this);
+	            }
+	        }
+
+	        return true;
+	    }
+
+	    return false;
 	}
 
 	@Override
@@ -225,11 +293,11 @@ public class Ring extends KindofMisc {
 
 		}
 	}
-	
+
 	public boolean isKnown() {
 		return anonymous || (handler != null && handler.isKnown( this ));
 	}
-	
+
 	public void setKnown() {
 		if (!anonymous) {
 			if (!isKnown()) {
@@ -242,7 +310,7 @@ public class Ring extends KindofMisc {
 			}
 		}
 	}
-	
+
 	@Override
 	public String name() {
 		return isKnown() ? super.name() : Messages.get(Ring.class, gem);
@@ -252,7 +320,7 @@ public class Ring extends KindofMisc {
 	public String desc() {
 		return isKnown() ? super.desc() : Messages.get(this, "unknown_desc");
 	}
-	
+
 	@Override
 	public String info(){
 		//skip custom notes if anonymized and un-Ided
@@ -266,15 +334,15 @@ public class Ring extends KindofMisc {
 
 		if (cursed && isEquipped( Dungeon.hero )) {
 			desc += "\n\n" + Messages.get(Ring.class, "cursed_worn");
-			
+
 		} else if (cursed && cursedKnown) {
 			desc += "\n\n" + Messages.get(Ring.class, "curse_known");
-			
+
 		} else if (!isIdentified() && cursedKnown){
 			desc += "\n\n" + Messages.get(Ring.class, "not_cursed");
-			
+
 		}
-		
+
 		if (isKnown()) {
 			desc += "\n\n" + statsInfo();
 
@@ -282,10 +350,10 @@ public class Ring extends KindofMisc {
 				desc += "\n\n" + Messages.get(this, "special_effect");
 			}
 		}
-		
+
 		return desc;
 	}
-	
+
 	public String statsInfo(){
 		return "";
 	}
@@ -301,23 +369,23 @@ public class Ring extends KindofMisc {
 	public String upgradeStat3(int level){
 		return null;
 	}
-	
+
 	@Override
 	public Item upgrade() {
 		super.upgrade();
-		
+
 		if (Random.Int(3) == 0) {
 			cursed = false;
 		}
-		
+
 		return this;
 	}
-	
+
 	@Override
 	public boolean isIdentified() {
 		return super.isIdentified() && isKnown();
 	}
-	
+
 	@Override
 	public Item identify( boolean byHero ) {
 		setKnown();
@@ -332,7 +400,7 @@ public class Ring extends KindofMisc {
 	public boolean readyToIdentify(){
 		return !isIdentified() && levelsToID <= 0;
 	}
-	
+
 	@Override
 	public Item random() {
 		//+0: 66.67% (2/3)
@@ -346,27 +414,27 @@ public class Ring extends KindofMisc {
 			}
 		}
 		level(n);
-		
+
 		//30% chance to be cursed
 		if (Random.Float() < 0.3f) {
 			cursed = true;
 		}
-		
+
 		return this;
 	}
-	
+
 	public static HashSet<Class<? extends Ring>> getKnown() {
 		return handler.known();
 	}
-	
+
 	public static HashSet<Class<? extends Ring>> getUnknown() {
 		return handler.unknown();
 	}
-	
+
 	public static boolean allKnown() {
 		return handler != null && handler.known().size() == Generator.Category.RING.classes.length;
 	}
-	
+
 	@Override
 	public int value() {
 		int price = 75;
@@ -385,7 +453,7 @@ public class Ring extends KindofMisc {
 		}
 		return price;
 	}
-	
+
 	public RingBuff buff() {
 		return null;
 	}
@@ -403,7 +471,7 @@ public class Ring extends KindofMisc {
 		super.restoreFromBundle( bundle );
 		levelsToID = bundle.getFloat( LEVELS_TO_ID );
 	}
-	
+
 	public void onHeroGainExp( float levelPercent, Hero hero ){
 		if (isIdentified() || !isEquipped(hero)) return;
 		levelPercent *= Talent.itemIDSpeedFactor(hero, this);
@@ -509,10 +577,10 @@ public class Ring extends KindofMisc {
 		return bonus;
 	}
 
-    public int onHit(Hero hero, Char enemy, int damage) {
-        //does nothing as default
-        return damage;
-    }
+	public int onHit(Hero hero, Char enemy, int damage) {
+		//does nothing as default
+		return damage;
+	}
 
 	public class RingBuff extends Buff {
 

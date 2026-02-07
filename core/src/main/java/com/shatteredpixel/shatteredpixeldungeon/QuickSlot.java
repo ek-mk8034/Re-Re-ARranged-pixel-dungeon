@@ -40,7 +40,6 @@ public class QuickSlot {
 	public static int SIZE = 6;
 	private Item[] slots = new Item[SIZE];
 
-
 	//direct array interaction methods, everything should build from these methods.
 	public void setSlot(int slot, Item item){
 		clearItem(item); //we don't want to allow the same item in multiple slots.
@@ -53,6 +52,11 @@ public class QuickSlot {
 
 	public void reset(){
 		slots = new Item[SIZE];
+	}
+
+	// alias (편의용) — 호출부에서 clearAll 쓰고 싶으면 유지
+	public void clearAll(){
+		reset();
 	}
 
 	public Item getItem(int slot){
@@ -96,11 +100,11 @@ public class QuickSlot {
 	}
 
 	public void convertToPlaceholder(Item item){
-		
+
 		if (contains(item)) {
 			Item placeholder = item.virtual();
 			if (placeholder == null) return;
-			
+
 			for (int i = 0; i < SIZE; i++) {
 				if (getItem(i) == item) setSlot(i, placeholder);
 			}
@@ -153,7 +157,5 @@ public class QuickSlot {
 			setSlot( i, (Item)item );
 			i++;
 		}
-
 	}
-
 }

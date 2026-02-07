@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LostInventory;
@@ -71,16 +72,18 @@ public class Belongings implements Iterable<Item> {
 	}
 
 	public Backpack backpack;
-	
+
 	public Belongings( Hero owner ) {
 		this.owner = owner;
-		
+
 		backpack = new Backpack();
 		backpack.owner = owner;
 	}
 
 	public KindOfWeapon weapon = null;
 	public Armor armor = null;
+
+	// NOTE: ONE_SLOT_PACK에서는 artifact/ring 슬롯이 "사용 불가"가 되어야 함.
 	public Artifact artifact = null;
 	public KindofMisc misc = null;
 	public Ring ring = null;
@@ -97,6 +100,10 @@ public class Belongings implements Iterable<Item> {
 	//*** these accessor methods are so that worn items can be affected by various effects/debuffs
 	// we still want to access the raw equipped items in cases where effects should be ignored though,
 	// such as when equipping something, showing an interface, or dealing with items from a dead hero
+
+	private boolean oneSlotPack(){
+		return Dungeon.isChallenged(Challenges.ONE_SLOT_PACK);
+	}
 
 	//normally the primary equipped weapon, but can also be a thrown weapon or an ability's weapon
 	public KindOfWeapon attackingWeapon(){
@@ -131,7 +138,13 @@ public class Belongings implements Iterable<Item> {
 		}
 	}
 
+	/**
+	 * ONE_SLOT_PACK: artifact 슬롯은 완전 비활성.
+	 * -> 항상 null 처리 (효과/표시/사용 모두 봉인)
+	 */
 	public Artifact artifact(){
+		if (oneSlotPack()) return null;
+
 		if (!lostInventory() || (artifact != null && artifact.keptThroughLostInventory())){
 			return artifact;
 		} else {
@@ -147,7 +160,13 @@ public class Belongings implements Iterable<Item> {
 		}
 	}
 
+	/**
+	 * ONE_SLOT_PACK: ring 슬롯은 완전 비활성.
+	 * -> 항상 null 처리
+	 */
 	public Ring ring(){
+		if (oneSlotPack()) return null;
+
 		if (!lostInventory() || (ring != null && ring.keptThroughLostInventory())){
 			return ring;
 		} else {
@@ -164,7 +183,7 @@ public class Belongings implements Iterable<Item> {
 	}
 
 	// ***
-	
+
 	private static final String WEAPON		= "weapon";
 	private static final String ARMOR		= "armor";
 	private static final String ARTIFACT   = "artifact";
@@ -174,41 +193,48 @@ public class Belongings implements Iterable<Item> {
 	private static final String SECOND_WEP = "second_wep";
 
 	public void storeInBundle( Bundle bundle ) {
-		
+
 		backpack.storeInBundle( bundle );
-		
+
 		bundle.put( WEAPON, weapon );
 		bundle.put( ARMOR, armor );
+
+		// ONE_SLOT_PACK이면 artifact/ring은 저장해도 로드시 정리되지만,
+		// 애초에 룰상 비활성이므로 그대로 저장해도 무방함.
 		bundle.put( ARTIFACT, artifact );
 		bundle.put( MISC, misc );
 		bundle.put( RING, ring );
+
 		bundle.put( SECOND_WEP, secondWep );
 	}
 
 	public static boolean bundleRestoring = false;
-	
+
 	public void restoreFromBundle( Bundle bundle ) {
 		bundleRestoring = true;
 		backpack.clear();
 		backpack.restoreFromBundle( bundle );
-		
+
 		weapon = (KindOfWeapon) bundle.get(WEAPON);
 		if (weapon() != null)       weapon().activate(owner);
-		
+
 		armor = (Armor)bundle.get( ARMOR );
 		if (armor() != null)        armor().activate( owner );
 
 		artifact = (Artifact) bundle.get(ARTIFACT);
-		if (artifact() != null)     artifact().activate(owner);
+		if (artifact != null)       artifact.activate(owner);
 
 		misc = (KindofMisc) bundle.get(MISC);
 		if (misc() != null)         misc().activate( owner );
 
 		ring = (Ring) bundle.get(RING);
-		if (ring() != null)         ring().activate( owner );
+		if (ring != null)           ring.activate( owner );
 
 		secondWep = (KindOfWeapon) bundle.get(SECOND_WEP);
 		if (secondWep() != null)    secondWep().activate(owner);
+
+		// ✅ ONE_SLOT_PACK 규칙 강제 적용(로드 후에도 artifact/ring 슬롯 봉인)
+		enforceOneSlotPackEquipmentRule();
 
 		bundleRestoring = false;
 	}
@@ -221,7 +247,7 @@ public class Belongings implements Iterable<Item> {
 		misc = null;
 		ring = null;
 	}
-	
+
 	public static void preview( GamesInProgress.Info info, Bundle bundle ) {
 		if (bundle.contains( ARMOR )){
 			Armor armor = ((Armor)bundle.get( ARMOR ));
@@ -249,7 +275,7 @@ public class Belongings implements Iterable<Item> {
 
 		return result;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public<T extends Item> T getItem( Class<T> itemClass ) {
 
@@ -262,7 +288,7 @@ public class Belongings implements Iterable<Item> {
 				}
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -281,11 +307,11 @@ public class Belongings implements Iterable<Item> {
 
 		return result;
 	}
-	
+
 	public boolean contains( Item contains ){
 
 		boolean lostInvent = lostInventory();
-		
+
 		for (Item item : this) {
 			if (contains == item) {
 				if (!lostInvent || item.keptThroughLostInventory()) {
@@ -293,14 +319,14 @@ public class Belongings implements Iterable<Item> {
 				}
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	public Item getSimilar( Item similar ){
 
 		boolean lostInvent = lostInventory();
-		
+
 		for (Item item : this) {
 			if (similar != item && similar.isSimilar(item)) {
 				if (!lostInvent || item.keptThroughLostInventory()) {
@@ -308,15 +334,15 @@ public class Belongings implements Iterable<Item> {
 				}
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	public ArrayList<Item> getAllSimilar( Item similar ){
 		ArrayList<Item> result = new ArrayList<>();
 
 		boolean lostInvent = lostInventory();
-		
+
 		for (Item item : this) {
 			if (item != similar && similar.isSimilar(item)) {
 				if (!lostInvent || item.keptThroughLostInventory()) {
@@ -324,7 +350,7 @@ public class Belongings implements Iterable<Item> {
 				}
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -334,7 +360,7 @@ public class Belongings implements Iterable<Item> {
 			item.identify(false);
 		}
 	}
-	
+
 	public void observe() {
 		if (weapon() != null) {
 			if (ShardOfOblivion.passiveIDDisabled() && weapon() instanceof Weapon){
@@ -360,11 +386,23 @@ public class Belongings implements Iterable<Item> {
 				Badges.validateItemLevelAquired(armor());
 			}
 		}
-		if (artifact() != null) {
-			//oblivion shard does not prevent artifact IDing
-			artifact().identify();
-			Badges.validateItemLevelAquired(artifact());
+
+		// artifact/ring 슬롯은 ONE_SLOT_PACK에서 완전히 비활성이라 accessor로 건드리지 않음
+		if (!oneSlotPack()) {
+			if (artifact() != null) {
+				artifact().identify();
+				Badges.validateItemLevelAquired(artifact());
+			}
+			if (ring() != null) {
+				if (ShardOfOblivion.passiveIDDisabled()){
+					ring().setIDReady();
+				} else {
+					ring().identify();
+					Badges.validateItemLevelAquired(ring());
+				}
+			}
 		}
+
 		if (misc() != null) {
 			if (ShardOfOblivion.passiveIDDisabled() && misc() instanceof Ring){
 				((Ring) misc()).setIDReady();
@@ -373,14 +411,7 @@ public class Belongings implements Iterable<Item> {
 				Badges.validateItemLevelAquired(misc());
 			}
 		}
-		if (ring() != null) {
-			if (ShardOfOblivion.passiveIDDisabled()){
-				ring().setIDReady();
-			} else {
-				ring().identify();
-				Badges.validateItemLevelAquired(ring());
-			}
-		}
+
 		if (ShardOfOblivion.passiveIDDisabled()){
 			GLog.p(Messages.get(ShardOfOblivion.class, "identify_ready_worn"));
 		}
@@ -391,91 +422,131 @@ public class Belongings implements Iterable<Item> {
 		}
 		Item.updateQuickslot();
 	}
-	
+
 	public void uncurseEquipped() {
-		ScrollOfRemoveCurse.uncurse( owner, armor(), weapon(), artifact(), misc(), ring(), secondWep());
+		// ONE_SLOT_PACK에서는 artifact/ring은 무시되고 misc만 의미있음
+		if (oneSlotPack()){
+			ScrollOfRemoveCurse.uncurse( owner, armor(), weapon(), null, misc(), null, secondWep());
+		} else {
+			ScrollOfRemoveCurse.uncurse( owner, armor(), weapon(), artifact(), misc(), ring(), secondWep());
+		}
 	}
-	
+
 	public Item randomUnequipped() {
 		if (owner.buff(LostInventory.class) != null) return null;
 
 		return Random.element( backpack.items );
 	}
-	
+
 	public int charge( float charge ) {
-		
+
 		int count = 0;
-		
+
 		for (Wand.Charger charger : owner.buffs(Wand.Charger.class)){
 			charger.gainCharge(charge);
 			count++;
 		}
-		
+
 		return count;
+	}
+
+	/**
+	 * ONE_SLOT_PACK: "misc 슬롯만 허용"
+	 * - artifact/ring 슬롯에 뭐가 들어있으면 misc로 이동(비어있을 때)
+	 * - misc가 이미 차있으면 backpack으로 이동(collect)
+	 * - 최종적으로 artifact/ring은 null이 됨
+	 */
+	public void enforceOneSlotPackEquipmentRule(){
+		if (!oneSlotPack()) return;
+
+		// 1) artifact 처리
+		if (artifact != null){
+			if (misc == null && artifact instanceof KindofMisc){
+				misc = (KindofMisc) artifact;
+				misc.activate(owner);
+			} else {
+				// misc가 이미 있거나 캐스팅 불가면 인벤으로
+				artifact.collect();
+			}
+			artifact = null;
+		}
+
+		// 2) ring 처리
+		if (ring != null){
+			if (misc == null && ring instanceof KindofMisc){
+				misc = (KindofMisc) ring;
+				misc.activate(owner);
+			} else {
+				ring.collect();
+			}
+			ring = null;
+		}
 	}
 
 	@Override
 	public Iterator<Item> iterator() {
 		return new ItemIterator();
 	}
-	
+
 	private class ItemIterator implements Iterator<Item> {
 
 		private int index = 0;
-		
+
 		private Iterator<Item> backpackIterator = backpack.iterator();
-		
+
 		private Item[] equipped = {weapon, armor, artifact, misc, ring, secondWep};
 		private int backpackIndex = equipped.length;
-		
+
 		@Override
 		public boolean hasNext() {
-			
+
+			// ONE_SLOT_PACK에서는 artifact/ring 슬롯은 비활성이므로, 여기서도 사실상 null이 되도록
+			// enforceOneSlotPackEquipmentRule()가 항상 선행되는 구조임.
 			for (int i=index; i < backpackIndex; i++) {
 				if (equipped[i] != null) {
 					return true;
 				}
 			}
-			
+
 			return backpackIterator.hasNext();
 		}
 
 		@Override
 		public Item next() {
-			
+
 			while (index < backpackIndex) {
 				Item item = equipped[index++];
 				if (item != null) {
 					return item;
 				}
 			}
-			
+
 			return backpackIterator.next();
 		}
 
 		@Override
 		public void remove() {
 			switch (index) {
-			case 0:
-				equipped[0] = weapon = null;
-				break;
-			case 1:
-				equipped[1] = armor = null;
-				break;
-			case 2:
-				equipped[2] = artifact = null;
-				break;
-			case 3:
-				equipped[3] = misc = null;
-				break;
-			case 4:
-				equipped[4] = ring = null;
-				break;
-			case 5:
-				equipped[5] = secondWep = null;
-				break;
-			default:
-				backpackIterator.remove();
+				case 0:
+					equipped[0] = weapon = null;
+					break;
+				case 1:
+					equipped[1] = armor = null;
+					break;
+				case 2:
+					equipped[2] = artifact = null;
+					break;
+				case 3:
+					equipped[3] = misc = null;
+					break;
+				case 4:
+					equipped[4] = ring = null;
+					break;
+				case 5:
+					equipped[5] = secondWep = null;
+					break;
+				default:
+					backpackIterator.remove();
 			}
 		}
 	}

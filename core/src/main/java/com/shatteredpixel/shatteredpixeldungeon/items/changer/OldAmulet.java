@@ -140,12 +140,12 @@ public class OldAmulet extends Item {
             return;
         }
 
-        // ===== Samurai 전용: Sheath만 선택 -> 요검/명검 선택 -> 축복 저장 -> OldAmulet 소모 =====
+        // ===== Samurai 전용: Sheath만 선택 -> 요검/명검 선택(설명 포함) -> 축복 저장 -> OldAmulet 소모 =====
         if (hero.heroClass == HeroClass.SAMURAI) {
 
             // 이미 선택했으면 다시 못 쓰게
             if (hero.buff(SamuraiTempleBlessing.class) != null) {
-                GLog.w(Messages.get(this, "already_blessed")); // strings에 추가 권장
+                GLog.w(Messages.get(this, "already_blessed"));
                 return;
             }
 
@@ -159,7 +159,89 @@ public class OldAmulet extends Item {
     }
 
     private String inventoryTitle() {
+        // ✅ 여기 키를 번역 파일에 꼭 넣어야 !!NO TEXT FOUND!! 안 뜸
         return Messages.get(this, "inv_title");
+    }
+
+    // ----------------------------
+    // Samurai: 요검/명검 선택창(설명 포함)
+    // ----------------------------
+    private void showSamuraiSheathChoice(final Hero h) {
+        GameScene.show(new WndSamuraiSheathChoice(h));
+    }
+
+    private class WndSamuraiSheathChoice extends WndOptions {
+
+        private final Hero hero;
+
+        WndSamuraiSheathChoice(final Hero hero) {
+            super(
+                new ItemSprite(OldAmulet.this),
+                Messages.titleCase(OldAmulet.this.name()),
+                // ✅ 본문(짧은 안내). 상세 설명은 info로 보게 하는 방식
+                Messages.get(OldAmulet.this, "samurai_select_prompt"),
+                Messages.get(OldAmulet.this, "yok_btn"),
+                Messages.get(OldAmulet.this, "myeong_btn"),
+                Messages.get(OldAmulet.this, "cancel")
+            );
+            this.hero = hero;
+        }
+
+        @Override
+        protected void onSelect(int index) {
+            if (index == 0) {
+                // 요검
+                SamuraiTempleBlessing.ensure(hero, SamuraiTempleBlessing.Path.YOK);
+
+                GLog.p(Messages.get(SamuraiTempleBlessing.class, "gain_yok"));
+                hero.sprite.showStatus(
+                        0xCC0000,
+                        Messages.get(SamuraiTempleBlessing.class, "short_yok")
+                );
+
+                OldAmulet.this.detach(hero.belongings.backpack);
+                hero.spendAndNext(Actor.TICK);
+
+            } else if (index == 1) {
+                // 명검
+                SamuraiTempleBlessing.ensure(hero, SamuraiTempleBlessing.Path.MYEONG);
+
+                GLog.p(Messages.get(SamuraiTempleBlessing.class, "gain_myeong"));
+                hero.sprite.showStatus(
+                        0xFFFFFF,
+                        Messages.get(SamuraiTempleBlessing.class, "short_myeong")
+                );
+
+                OldAmulet.this.detach(hero.belongings.backpack);
+                hero.spendAndNext(Actor.TICK);
+
+            } else {
+                hide();
+            }
+        }
+
+        @Override
+        protected boolean hasInfo(int index) {
+            // ✅ 0=요검, 1=명검만 info 버튼 활성화
+            return index == 0 || index == 1;
+        }
+
+        @Override
+        protected void onInfo(int index) {
+            if (index == 0) {
+                GameScene.show(new WndTitledMessage(
+                        Icons.get(Icons.INFO),
+                        Messages.get(OldAmulet.this, "yok_title"),
+                        Messages.get(OldAmulet.this, "yok_desc")
+                ));
+            } else if (index == 1) {
+                GameScene.show(new WndTitledMessage(
+                        Icons.get(Icons.INFO),
+                        Messages.get(OldAmulet.this, "myeong_title"),
+                        Messages.get(OldAmulet.this, "myeong_desc")
+                ));
+            }
+        }
     }
 
     // ----------------------------
@@ -170,7 +252,7 @@ public class OldAmulet extends Item {
         @Override
         public String textPrompt() {
             return inventoryTitle();
-        }        
+        }
 
         @Override
         public Class<? extends Bag> preferredBag() {
@@ -192,53 +274,16 @@ public class OldAmulet extends Item {
             // safety: OldAmulet가 실행 중일 때만
             if (!(curItem instanceof OldAmulet)) return;
 
-            // Sheath 선택했으면 이제 요검/명검 선택 창
+            // 이미 선택했으면 막기(이중 안전장치)
             final Hero h = Dungeon.hero;
+            if (h == null) return;
+            if (h.buff(SamuraiTempleBlessing.class) != null) {
+                GLog.w(Messages.get(OldAmulet.this, "already_blessed"));
+                return;
+            }
 
-            GameScene.show(new WndOptions(
-                    new ItemSprite(OldAmulet.this),
-                    Messages.titleCase(OldAmulet.this.name()),
-                    Messages.get(OldAmulet.this, "samurai_select"),
-                    Messages.get(OldAmulet.this, "yok"),
-                    Messages.get(OldAmulet.this, "myeong"),
-                    Messages.get(OldAmulet.this, "cancel")
-            ) {
-                @Override
-                protected void onSelect(int index) {
-
-                    if (index == 0) {
-                        // 요검
-                        SamuraiTempleBlessing.ensure(h, SamuraiTempleBlessing.Path.YOK);
-
-                        GLog.p(Messages.get(SamuraiTempleBlessing.class, "gain_yok"));
-                        h.sprite.showStatus(
-                                0xCC0000, // 진한 빨강
-                                Messages.get(SamuraiTempleBlessing.class, "short_yok")
-                        );
-
-                        OldAmulet.this.detach(h.belongings.backpack);
-                        h.spendAndNext(Actor.TICK);
-
-                    } else if (index == 1) {
-                        // 명검
-                        SamuraiTempleBlessing.ensure(h, SamuraiTempleBlessing.Path.MYEONG);
-
-                        GLog.p(Messages.get(SamuraiTempleBlessing.class, "gain_myeong"));
-                        h.sprite.showStatus(
-                                0xFFFFFF, // 흰색
-                                Messages.get(SamuraiTempleBlessing.class, "short_myeong")
-                        );
-
-                        OldAmulet.this.detach(h.belongings.backpack);
-                        h.spendAndNext(Actor.TICK);
-
-                    } else {
-                        // 취소: 아무 것도 소모하지 않음
-                        hide();
-                    }
-                }
-            });
-
+            // Sheath 선택했으면 이제 요검/명검 선택(설명 포함)
+            showSamuraiSheathChoice(h);
         }
     };
 

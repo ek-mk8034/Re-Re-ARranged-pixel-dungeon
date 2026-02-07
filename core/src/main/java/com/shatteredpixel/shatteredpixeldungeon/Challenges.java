@@ -66,7 +66,7 @@ import java.util.ArrayList;
 
 public class Challenges {
 
-	//Some of these internal IDs are outdated and don't represent what these challenges do
+	// Some of these internal IDs are outdated and don't represent what these challenges do
 	public static final int NO_FOOD				= 1;
 	public static final int NO_ARMOR			= 2;
 	public static final int NO_HEALING			= 4;
@@ -81,11 +81,13 @@ public class Challenges {
 	public static final int CURSED_DUNGEON		= 2048;
 	public static final int FATIGUE				= 4096;
 	public static final int MUTATION			= 8192;
-	public static final int NO_HP_UI = 16384;   // 2^14
+	public static final int NO_HP_UI			= 16384;   // 2^14
 
-	public static final int MAX_VALUE = 32767;  // 2^15 - 1
-	public static final int MAX_CHALS = 15;     // 기존 14 -> 15
+	// ✅ NEW CHALLENGE: only first backpack slot usable, and no bag-type items obtainable
+	public static final int ONE_SLOT_PACK		= 32768;   // 2^15
 
+	public static final int MAX_VALUE			= 65535;   // 2^16 - 1
+	public static final int MAX_CHALS			= 16;      // 기존 15 -> 16
 
 	public static final String[] NAME_IDS = {
 			"champion_enemies",
@@ -102,12 +104,27 @@ public class Challenges {
 			"cursed_dungeon",
 			"fatigue",
 			"mutation",
-    		"no_hp_ui"
+			"no_hp_ui",
+			"one_slot_pack"   // ✅ 추가
 	};
 
 	public static final int[] MASKS = {
-			CHAMPION_ENEMIES, STRONGER_BOSSES, NO_FOOD, NO_ARMOR, NO_HEALING, NO_HERBALISM, SWARM_INTELLIGENCE, DARKNESS, NO_SCROLLS, SUPERMAN, PYRO, CURSED_DUNGEON, FATIGUE, MUTATION, NO_HP_UI
-
+			CHAMPION_ENEMIES,
+			STRONGER_BOSSES,
+			NO_FOOD,
+			NO_ARMOR,
+			NO_HEALING,
+			NO_HERBALISM,
+			SWARM_INTELLIGENCE,
+			DARKNESS,
+			NO_SCROLLS,
+			SUPERMAN,
+			PYRO,
+			CURSED_DUNGEON,
+			FATIGUE,
+			MUTATION,
+			NO_HP_UI,
+			ONE_SLOT_PACK      // ✅ 추가
 	};
 
 	public static int activeChallenges(){
