@@ -69,13 +69,10 @@ public class VaultLevel extends CityLevel {
 			initRooms.add(new VaultCircleRoom());
 			initRooms.add(new VaultCrossRoom());
 			initRooms.add(new VaultQuadrantsRoom());
-<<<<<<< HEAD
-=======
 			initRooms.add(new VaultEnemyCenterRoom());
 			initRooms.add(new VaultRingsRoom());
 			initRooms.add(new VaultSimpleEnemyTreasureRoom());
 			initRooms.add(new AlternatingTrapsRoom());
->>>>>>> cdec67e8d (v3.3.6: implemented two new hazards for the vault, some WIP still)
 		}
 
 		initRooms.add(new VaultLongRoom());

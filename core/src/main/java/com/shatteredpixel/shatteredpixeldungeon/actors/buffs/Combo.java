@@ -94,10 +94,8 @@ public class Combo extends Buff implements ActionIndicator.Action {
 
 		if (!enemy.isAlive() || (enemy.buff(Corruption.class) != null && enemy.HP == enemy.HT)) {
 
-		    // v3.3.5 quit-exploit 방지 의도는 유지하되,
-		    // RE 모드에서 comboTime을 "무조건 150으로 덮어써서" 시작해버리는 부작용을 막기 위해 max로 보정한다.
-		    float safeComboTime = 150f + 15f * ((Hero) target).pointsInTalent(Talent.CLEAVE);
-		    comboTime = Math.max(comboTime, safeComboTime);
+		    // upstream 정상 동작: kill/정화 타이밍에 comboTime 재설정 (v3.3.5 quit-exploit 방지 포함 흐름)
+		    comboTime = 15f + 15f * ((Hero)target).pointsInTalent(Talent.CLEAVE);
 
 		    // 너 커스텀 유지 (SKILL_REPEAT 로직)
 		    if (Dungeon.hero.hasTalent(Talent.SKILL_REPEAT)) {
