@@ -52,8 +52,13 @@ public class Juggling extends Buff implements ActionIndicator.Action {
         return 3 + hero.pointsInTalent(Talent.SKILLFUL_JUGGLING);
     }
 
+    public boolean isJugglingNow() {
+        return !weapons.isEmpty();
+    }
+
     public void juggle(Hero hero, MissileWeapon wep, boolean useTurn) {
         weapons.offer(wep);
+
         if (weapons.size() > (maxWeapons(hero))) {
             MissileWeapon polled = weapons.poll();
             if (polled != null) {
@@ -68,8 +73,10 @@ public class Juggling extends Buff implements ActionIndicator.Action {
             }
             hero.spend(-1);
         }
+
         hero.sprite.zap(hero.pos);
         Sample.INSTANCE.play(Assets.Sounds.MISS);
+
         if (useTurn) {
             hero.spendAndNext(Math.max(0, 1f - hero.pointsInTalent(Talent.SWIFT_JUGGLING)/3f));
         }
@@ -79,23 +86,26 @@ public class Juggling extends Buff implements ActionIndicator.Action {
 
     @Override
     public void detach() {
+        // Arrow 투사체는 바닥 드랍 대신 ArrowItem으로 변환 (안정)
         for (MissileWeapon weapon : weapons) {
-            if (weapon != null) Dungeon.level.drop(weapon, target.pos);
+            if (weapon == null) continue;
+
+            if (weapon instanceof BowWeapon.Arrow) {
+                Dungeon.level.drop(new ArrowItem(), target.pos).sprite.drop(target.pos);
+            } else {
+                Dungeon.level.drop(weapon, target.pos);
+            }
         }
         ActionIndicator.clearAction();
-
         super.detach();
     }
 
     @Override
     public boolean act() {
-
         if (weapons.isEmpty()) {
             detach();
         }
-
         spend(TICK);
-
         return true;
     }
 
@@ -139,7 +149,6 @@ public class Juggling extends Buff implements ActionIndicator.Action {
     @Override
     public void storeInBundle(Bundle bundle) {
         super.storeInBundle(bundle);
-
         bundle.put(WEAPONS, weapons);
     }
 
@@ -147,7 +156,7 @@ public class Juggling extends Buff implements ActionIndicator.Action {
     public void restoreFromBundle(Bundle bundle) {
         super.restoreFromBundle(bundle);
 
-        for (Bundlable item : bundle.getCollection( WEAPONS )) {
+        for (Bundlable item : bundle.getCollection(WEAPONS)) {
             if (item != null){
                 weapons.add((MissileWeapon) item);
             }
@@ -162,6 +171,7 @@ public class Juggling extends Buff implements ActionIndicator.Action {
             if (cell != null) {
                 Ballistica aim = new Ballistica(Dungeon.hero.pos, cell, Ballistica.STOP_TARGET);
                 int destination = aim.collisionPos;
+
                 while (!weapons.isEmpty()) {
                     MissileWeapon weapon = weapons.poll();
                     if (weapon != null) {
@@ -176,17 +186,22 @@ public class Juggling extends Buff implements ActionIndicator.Action {
                                         }
                                     }
                                 }
-                            }); //기존의 cast()를 사용하면 인벤토리의 투척 무기를 강제로 없애고 턴을 소모하는 문제가 있어 새로운 cast()를 정의해서 사용함
+                            });
                         } else {
-                            Dungeon.level.drop(weapon, Dungeon.hero.pos);
-                            if (weapons.isEmpty()) { //마지막 무기가 무거운 경우 이전에 던진 투척에는 턴을 소모하지 않으므로 여기에서 턴을 소모함
+                            if (weapon instanceof BowWeapon.Arrow) {
+                                Dungeon.level.drop(new ArrowItem(), Dungeon.hero.pos).sprite.drop(Dungeon.hero.pos);
+                            } else {
+                                Dungeon.level.drop(weapon, Dungeon.hero.pos);
+                            }
+
+                            if (weapons.isEmpty()) {
                                 Dungeon.hero.spendAndNext(1);
                             }
                         }
                     }
                 }
 
-                detach(); //버프를 제거한다. 만약 (그럴 일은 없지만) 저글링 중인 투척 무기가 남은 경우 바닥에 떨어뜨린다.
+                detach();
             }
         }
 
@@ -223,25 +238,46 @@ public class Juggling extends Buff implements ActionIndicator.Action {
         return bow;
     }
 
+    /**
+     * ✅ 어떤 킬이든 Mob.die에서 호출됨
+     * - 화살통이 있을 때만 발동
+     * - 킬 시점에 bullet을 소모하면서 저글링 화살을 장전
+     * - 장전된 화살은 useBullet=false로 만들어서 발사 시 추가 소모 방지
+     */
     public static void kill() {
-        if (Dungeon.hero.subClass == HeroSubClass.JUGGLER
-                && Dungeon.bullet > 1
-                && Dungeon.hero.hasTalent(Talent.HABITUAL_HAND)) {
+        if (Dungeon.hero.subClass != HeroSubClass.JUGGLER) return;
+        if (!Dungeon.hero.hasTalent(Talent.HABITUAL_HAND)) return;
 
-            // 이미 저글링 중이면 추가 발동 금지
-            if (Dungeon.hero.buff(Juggling.class) != null) return;
+        if (Dungeon.bullet <= 0) return;
 
-            for (int i = 0; i < Dungeon.hero.pointsInTalent(Talent.HABITUAL_HAND); i++) {
-                if (Dungeon.bullet <= 0) break;
-                BowWeapon.Arrow arrow = getBow().knockArrow();
-                arrow.useBullet = false;
-                Buff.affect(Dungeon.hero, Juggling.class).juggle(Dungeon.hero, arrow, false);
-                Dungeon.bullet--;
-            }
-            Item.updateQuickslot();
+        Juggling j = Dungeon.hero.buff(Juggling.class);
+        if (j != null && j.isJugglingNow()) return;
+
+        int n = Dungeon.hero.pointsInTalent(Talent.HABITUAL_HAND); // 1/2/3
+        if (n <= 0) return;
+
+        n = Math.min(n, Dungeon.bullet);
+        if (n <= 0) return;
+
+        if (j == null) j = Buff.affect(Dungeon.hero, Juggling.class);
+
+        for (int i = 0; i < n; i++) {
+            // ✅ 킬 시점에 탄약 소비
+            Dungeon.bullet--;
+
+            BowWeapon.Arrow arrow = getBow().knockArrow();
+
+            // ✅ 발사 시 추가 탄약 소모 방지(킬에서 이미 소비했으므로)
+            arrow.useBullet = false;
+
+            // ✅ BowWeapon 쪽에서 useBullet=false여도 드랍/꽂힘 허용하도록 플래그(3번 패치 필요)
+            arrow.fromJuggling = true;
+
+            j.juggle(Dungeon.hero, arrow, false);
         }
-    }
 
+        Item.updateQuickslot();
+    }
 
     public static float accuracyFactor(Hero hero) {
         if (hero.buff(Juggling.class) != null) {
@@ -251,22 +287,31 @@ public class Juggling extends Buff implements ActionIndicator.Action {
         }
     }
 
+    /**
+     * TOUR_PERFORMANCE도 동일 컨셉으로: "탄약이 있을 때만" + "발동 시 탄약 1 소비"
+     */
     public static void move() {
-        if (Dungeon.hero.subClass == HeroSubClass.JUGGLER
-                && Dungeon.bullet > 1
-                && Dungeon.hero.hasTalent(Talent.TOUR_PERFORMANCE)
-                && Random.Float() < 0.01f * Dungeon.hero.pointsInTalent(Talent.TOUR_PERFORMANCE)) {
+        if (Dungeon.hero.subClass != HeroSubClass.JUGGLER) return;
+        if (!Dungeon.hero.hasTalent(Talent.TOUR_PERFORMANCE)) return;
 
-            // 이미 저글링 중이면 추가 발동 금지
-            if (Dungeon.hero.buff(Juggling.class) != null) return;
+        if (Dungeon.bullet <= 0) return;
 
-            if (Dungeon.bullet <= 0) return;
+        if (Random.Float() >= 0.01f * Dungeon.hero.pointsInTalent(Talent.TOUR_PERFORMANCE)) return;
 
-            BowWeapon.Arrow arrow = getBow().knockArrow();
-            arrow.useBullet = false;
-            Buff.affect(Dungeon.hero, Juggling.class).juggle(Dungeon.hero, arrow, false);
-            Dungeon.bullet--;
-            Item.updateQuickslot();
-        }
+        Juggling j = Dungeon.hero.buff(Juggling.class);
+        if (j != null && j.isJugglingNow()) return;
+
+        if (j == null) j = Buff.affect(Dungeon.hero, Juggling.class);
+
+        // ✅ 발동 시 탄약 1 소비
+        Dungeon.bullet--;
+
+        BowWeapon.Arrow arrow = getBow().knockArrow();
+        arrow.useBullet = false;
+        arrow.fromJuggling = true;
+
+        j.juggle(Dungeon.hero, arrow, false);
+
+        Item.updateQuickslot();
     }
 }

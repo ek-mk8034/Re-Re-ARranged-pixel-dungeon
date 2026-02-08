@@ -40,7 +40,7 @@ import java.util.ArrayList;
 
 public class BowWeapon extends MeleeWeapon {
 
-    public static final String AC_SHOOT		= "SHOOT";
+    public static final String AC_SHOOT     = "SHOOT";
 
     {
         defaultAction = AC_SHOOT;
@@ -222,12 +222,24 @@ public class BowWeapon extends MeleeWeapon {
         }
 
         private BowWeapon arrowFrom;
+
+        /** true면 발사 시 Dungeon.bullet 소모 */
         public boolean useBullet = true;
+
+        /** true면 버스트 샷 */
         public boolean isBurst = false;
+
+        /**
+         * ✅ 저글링/킬 트리거로 생성된 화살 표시용.
+         * - useBullet=false여도 "드랍/꽂힘"은 되게 하고 싶을 때 사용.
+         * - 즉, "탄약 소모"와 "드랍 가능"을 분리하는 플래그.
+         */
+        public boolean fromJuggling = false;
 
         private static final String ARROW_FROM = "arrowFrom";
         private static final String USE_BULLET = "useBullet";
         private static final String IS_BURST = "isBurst";
+        private static final String FROM_JUGGLING = "fromJuggling";
 
         @Override
         public void storeInBundle(Bundle bundle) {
@@ -236,6 +248,7 @@ public class BowWeapon extends MeleeWeapon {
             bundle.put(ARROW_FROM, arrowFrom);
             bundle.put(USE_BULLET, useBullet);
             bundle.put(IS_BURST, isBurst);
+            bundle.put(FROM_JUGGLING, fromJuggling);
         }
 
         @Override
@@ -245,6 +258,7 @@ public class BowWeapon extends MeleeWeapon {
             arrowFrom = (BowWeapon) bundle.get(ARROW_FROM);
             useBullet = bundle.getBoolean(USE_BULLET);
             isBurst = bundle.getBoolean(IS_BURST);
+            fromJuggling = bundle.getBoolean(FROM_JUGGLING);
         }
 
         public void reset(BowWeapon bow) {
@@ -253,6 +267,11 @@ public class BowWeapon extends MeleeWeapon {
             this.augment = bow.augment;
             this.masteryPotionBonus = bow.masteryPotionBonus;
             this.tier = bow.tier();
+
+            // 기본값은 일반 발사 화살
+            this.useBullet = true;
+            this.isBurst = false;
+            this.fromJuggling = false;
         }
 
         @Override
@@ -308,7 +327,6 @@ public class BowWeapon extends MeleeWeapon {
 
         @Override
         public boolean hasEnchant(Class<? extends Enchantment> type, Char owner) {
-
             return arrowFrom.hasEnchant(type, owner);
         }
 
@@ -360,11 +378,14 @@ public class BowWeapon extends MeleeWeapon {
         protected void onThrow(int cell) {
             Char enemy = Actor.findChar(cell);
 
+            // ✅ "드랍/꽂힘 가능" 판정은 useBullet과 분리
+            boolean canDropOrPin = (useBullet || fromJuggling);
+
             if (enemy != null && !(enemy instanceof Hero)) {
                 if (curUser.shoot(enemy, this)) {
 
-                    // ✅ 실제 화살(useBullet=true)만 꽂힘/드랍 가능
-                    if (useBullet && Random.Float() < arrowPinChance()) {
+                    // ✅ 일반 화살 + 저글링 화살 모두 꽂힘/드랍 가능
+                    if (canDropOrPin && Random.Float() < arrowPinChance()) {
                         if (enemy.isAlive()) {
                             Buff.affect(enemy, ArrowAttached.class).hit();
                         } else {
@@ -379,13 +400,13 @@ public class BowWeapon extends MeleeWeapon {
 
                 } else {
                     // miss
-                    if (useBullet && Random.Float() < arrowPinChance()) {
+                    if (canDropOrPin && Random.Float() < arrowPinChance()) {
                         dropArrow(cell);
                     }
                 }
             } else {
                 // empty cell or hero
-                if (useBullet && Random.Float() < arrowPinChance()) {
+                if (canDropOrPin && Random.Float() < arrowPinChance()) {
                     dropArrow(cell);
                 }
             }
@@ -394,15 +415,15 @@ public class BowWeapon extends MeleeWeapon {
             onShoot();
         }
 
-
         public void dropArrow(int cell) {
-            // 저글링/무료 화살(useBullet=false)은 소멸, 드랍 없음
-            if (!useBullet) return;
+            // ✅ useBullet=false라도 fromJuggling=true면 드랍 허용
+            if (!(useBullet || fromJuggling)) return;
 
             Dungeon.level.drop(new ArrowItem(), cell).sprite.drop(cell);
         }
 
         public void onShoot() {
+            // ✅ 탄약 소모는 "진짜 발사(useBullet=true)"만
             if (useBullet) Dungeon.bullet--;
 
             if (Dungeon.hero.buff(PenetrationShotBuff.class) != null) {
