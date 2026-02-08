@@ -310,38 +310,18 @@ public class MobSpawner extends Actor {
 		}
 	}
 
-	//switches out regular mobs for their alt versions when appropriate
-	private static void swapMobAlts(ArrayList<Class<?extends Mob>> rotation) {
+	private static void swapMobAlts(ArrayList<Class<? extends Mob>> rotation) {
 		float altChance = 1 / 50f * RatSkull.exoticChanceMultiplier();
+
 		for (int i = 0; i < rotation.size(); i++) {
 			if (Random.Float() < altChance) {
-				Class<? extends Mob> cl = rotation.get(i);
 
-				// --- 너 기존 규칙(일반 alt 치환) 유지 ---
-				if (cl == Rat.class)            cl = Albino.class;
-				else if (cl == Gnoll.class)     cl = GnollExile.class;
-				else if (cl == Crab.class)      cl = HermitCrab.class;
-				else if (cl == Slime.class)     cl = CausticSlime.class;
+				Class<? extends Mob> base = rotation.get(i);
+				Class<? extends Mob> alt = RARE_ALTS.get(base);
 
-				else if (cl == Thief.class)         cl = Bandit.class;
-				else if (cl == Necromancer.class)   cl = SpectralNecromancer.class;
-
-				else if (cl == Brute.class)     cl = ArmoredBrute.class;
-				else if (cl == DM200.class)     cl = DM201.class;
-
-				else if (cl == Monk.class)      cl = Senior.class;
-				// chaos elemental spawning happens in Elemental.Random
-
-				else if (cl == Scorpio.class)   cl = Acidic.class;
-				else if (cl == Soldier.class)   cl = SWAT.class;
-
-				// --- 업스트림 의도(rare alt가 있으면 그걸 우선) ---
-				Class<? extends Mob> rareAlt = RARE_ALTS.get(cl);
-				if (rareAlt != null) {
-				    cl = rareAlt;
+				if (alt != null) {
+					rotation.set(i, alt);
 				}
-
-				rotation.set(i, cl);
 			}
 		}
 	}
@@ -364,5 +344,8 @@ public class MobSpawner extends Actor {
 		RARE_ALTS.put(Elemental.class,      Elemental.ChaosElemental.class);
 
 		RARE_ALTS.put(Scorpio.class,        Acidic.class);
+
+		// Re-ARranged custom mobs: keep Soldier alt swap behavior
+		RARE_ALTS.put(Soldier.class,        SWAT.class);
 	}
 }
