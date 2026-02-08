@@ -358,38 +358,47 @@ public class BowWeapon extends MeleeWeapon {
 
         @Override
         protected void onThrow(int cell) {
-            Char enemy = Actor.findChar( cell );
+            Char enemy = Actor.findChar(cell);
+
             if (enemy != null && !(enemy instanceof Hero)) {
-                if (curUser.shoot( enemy, this )) {
-                    if (Random.Float() < arrowPinChance()) {
+                if (curUser.shoot(enemy, this)) {
+
+                    // ✅ 실제 화살(useBullet=true)만 꽂힘/드랍 가능
+                    if (useBullet && Random.Float() < arrowPinChance()) {
                         if (enemy.isAlive()) {
                             Buff.affect(enemy, ArrowAttached.class).hit();
                         } else {
                             dropArrow(cell);
                         }
                     }
+
                     if (!enemy.isAlive() && isBurst && Dungeon.hero.hasTalent(Talent.HURRICANE)) {
-                        Buff.affect(Dungeon.hero, GreaterHaste.class).set(1+Dungeon.hero.pointsInTalent(Talent.HURRICANE));
+                        Buff.affect(Dungeon.hero, GreaterHaste.class)
+                                .set(1 + Dungeon.hero.pointsInTalent(Talent.HURRICANE));
                     }
+
                 } else {
-                    if (Random.Float() < arrowPinChance()) {
+                    // miss
+                    if (useBullet && Random.Float() < arrowPinChance()) {
                         dropArrow(cell);
                     }
                 }
-            }
-
-            if (enemy == null || enemy instanceof Hero) {
-                if (Random.Float() < arrowPinChance()) {
+            } else {
+                // empty cell or hero
+                if (useBullet && Random.Float() < arrowPinChance()) {
                     dropArrow(cell);
                 }
             }
 
             SharpShooterBuff.rangedLethal(enemy, isBurst, this);
-
             onShoot();
         }
 
+
         public void dropArrow(int cell) {
+            // 저글링/무료 화살(useBullet=false)은 소멸, 드랍 없음
+            if (!useBullet) return;
+
             Dungeon.level.drop(new ArrowItem(), cell).sprite.drop(cell);
         }
 

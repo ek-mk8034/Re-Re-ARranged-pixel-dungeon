@@ -58,11 +58,13 @@ public class Juggling extends Buff implements ActionIndicator.Action {
             MissileWeapon polled = weapons.poll();
             if (polled != null) {
                 if (polled instanceof BowWeapon.Arrow) {
-                    new ArrowItem().doPickUp(hero, hero.pos);
+                    ArrowItem ai = new ArrowItem();
+                    ai.doPickUp(hero, hero.pos);
+                    GLog.i(Messages.get(hero, "you_now_have", ai.name()));
                 } else {
                     polled.doPickUp(hero, hero.pos);
+                    GLog.i(Messages.get(hero, "you_now_have", polled.name()));
                 }
-                GLog.i(Messages.get(hero, "you_now_have", polled.name()));
             }
             hero.spend(-1);
         }
@@ -158,7 +160,7 @@ public class Juggling extends Buff implements ActionIndicator.Action {
         @Override
         public void onSelect(Integer cell) {
             if (cell != null) {
-                Ballistica aim = new Ballistica(Dungeon.hero.pos, cell, Ballistica.PROJECTILE);
+                Ballistica aim = new Ballistica(Dungeon.hero.pos, cell, Ballistica.STOP_TARGET);
                 int destination = aim.collisionPos;
                 while (!weapons.isEmpty()) {
                     MissileWeapon weapon = weapons.poll();
@@ -222,7 +224,13 @@ public class Juggling extends Buff implements ActionIndicator.Action {
     }
 
     public static void kill() {
-        if (Dungeon.hero.subClass == HeroSubClass.JUGGLER && Dungeon.bullet > 1 && Dungeon.hero.hasTalent(Talent.HABITUAL_HAND)) {
+        if (Dungeon.hero.subClass == HeroSubClass.JUGGLER
+                && Dungeon.bullet > 1
+                && Dungeon.hero.hasTalent(Talent.HABITUAL_HAND)) {
+
+            // 이미 저글링 중이면 추가 발동 금지
+            if (Dungeon.hero.buff(Juggling.class) != null) return;
+
             for (int i = 0; i < Dungeon.hero.pointsInTalent(Talent.HABITUAL_HAND); i++) {
                 if (Dungeon.bullet <= 0) break;
                 BowWeapon.Arrow arrow = getBow().knockArrow();
@@ -233,6 +241,7 @@ public class Juggling extends Buff implements ActionIndicator.Action {
             Item.updateQuickslot();
         }
     }
+
 
     public static float accuracyFactor(Hero hero) {
         if (hero.buff(Juggling.class) != null) {
@@ -246,7 +255,10 @@ public class Juggling extends Buff implements ActionIndicator.Action {
         if (Dungeon.hero.subClass == HeroSubClass.JUGGLER
                 && Dungeon.bullet > 1
                 && Dungeon.hero.hasTalent(Talent.TOUR_PERFORMANCE)
-                && Random.Float() < 0.01f*Dungeon.hero.pointsInTalent(Talent.TOUR_PERFORMANCE)) {
+                && Random.Float() < 0.01f * Dungeon.hero.pointsInTalent(Talent.TOUR_PERFORMANCE)) {
+
+            // 이미 저글링 중이면 추가 발동 금지
+            if (Dungeon.hero.buff(Juggling.class) != null) return;
 
             if (Dungeon.bullet <= 0) return;
 

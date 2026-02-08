@@ -190,7 +190,6 @@ public enum HeroClass {
 		// 디버그/테스트 시드
 		if (DeviceCompat.isDebug() || SPDSettings.customSeed().contains("test")) {
 
-		    // 나머지 디버그 아이템은 기존처럼 collect 유지 가능
 		    new RingOfMight().identify().upgrade(10).collect();
 		    new RingOfEnergy().identify().upgrade(20).collect();
 		    new RingOfHaste().identify().upgrade(100).collect();
