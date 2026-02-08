@@ -958,144 +958,155 @@ public abstract class Mob extends Char {
 	@Override
 	public void die( Object cause ) {
 
-		if (cause == Chasm.class){
-			//50% chance to round up, 50% to round down
-			if (EXP % 2 == 1) EXP += Random.Int(2);
-			EXP /= 2;
-		}
+	    if (cause == Chasm.class){
+	        //50% chance to round up, 50% to round down
+	        if (EXP % 2 == 1) EXP += Random.Int(2);
+	        EXP /= 2;
+	    }
 
-		if (alignment == Alignment.ENEMY){
-			if (buff(Trap.HazardAssistTracker.class) != null){
-				Statistics.hazardAssistedKills++;
-				Badges.validateHazardAssists();
-			}
+	    if (alignment == Alignment.ENEMY){
 
-			rollToDropLoot();
+	        if (buff(Trap.HazardAssistTracker.class) != null){
+	            Statistics.hazardAssistedKills++;
+	            Badges.validateHazardAssists();
+	        }
 
-			if (cause == Dungeon.hero || cause instanceof Weapon || cause instanceof Weapon.Enchantment){
-				if (Dungeon.hero.hasTalent(Talent.LETHAL_MOMENTUM)
-						&& Random.Float() < 0.34f + 0.33f* Dungeon.hero.pointsInTalent(Talent.LETHAL_MOMENTUM)){
-					Buff.affect(Dungeon.hero, Talent.LethalMomentumTracker.class, 0f);
-				}
-				if (Dungeon.hero.heroClass != HeroClass.DUELIST
-						&& Dungeon.hero.hasTalent(Talent.LETHAL_HASTE)
-						&& Dungeon.hero.buff(Talent.LethalHasteCooldown.class) == null){
-					Buff.affect(Dungeon.hero, Talent.LethalHasteCooldown.class, 100f);
-					Buff.affect(Dungeon.hero, GreaterHaste.class).set(2 + 2*Dungeon.hero.pointsInTalent(Talent.LETHAL_HASTE));
-				}
-			}
+	        rollToDropLoot();
 
-		}
+	        // ✅ "영웅이 원인인 킬" 판정 통일
+	        boolean heroCausedKill =
+	                (cause == Dungeon.hero)
+	                || (cause instanceof Weapon)
+	                || (cause instanceof Weapon.Enchantment)
+	                || (cause instanceof Wand)
+	                || (cause instanceof DirectableAlly);
 
-		if (Dungeon.level.map[pos] != Terrain.PIT && hero.hasTalent(Talent.ENERGY_REMAINS)) {
-			int chance = Random.Int(6);
-			int point = Dungeon.hero.pointsInTalent(Talent.ENERGY_REMAINS);
-			switch (chance) {
-				default:
-					break;
-				case 0:
-					if (point >= 1) {
-						Buff.affect(hero, WandRechargeArea.class).setup(pos);
-					}
-					break;
-				case 1:
-					if (point >= 2) {
-						Buff.affect(hero, ArtifactRechargeArea.class).setup(pos);
-					}
-					break;
-				case 2:
-					if (point >= 3) {
-						Buff.affect(hero, BarrierRechargeArea.class).setup(pos);
-					}
-					break;
-			}
-		}
+	        if (heroCausedKill){
+	            if (Dungeon.hero.hasTalent(Talent.LETHAL_MOMENTUM)
+	                    && Random.Float() < 0.34f + 0.33f* Dungeon.hero.pointsInTalent(Talent.LETHAL_MOMENTUM)){
+	                Buff.affect(Dungeon.hero, Talent.LethalMomentumTracker.class, 0f);
+	            }
+	            if (Dungeon.hero.heroClass != HeroClass.DUELIST
+	                    && Dungeon.hero.hasTalent(Talent.LETHAL_HASTE)
+	                    && Dungeon.hero.buff(Talent.LethalHasteCooldown.class) == null){
+	                Buff.affect(Dungeon.hero, Talent.LethalHasteCooldown.class, 100f);
+	                Buff.affect(Dungeon.hero, GreaterHaste.class).set(2 + 2*Dungeon.hero.pointsInTalent(Talent.LETHAL_HASTE));
+	            }
+	        }
+	    }
 
-		if (hero.buff(FirstAidBuff.FirstAidBuffCooldown.class) != null) {
-			hero.buff(FirstAidBuff.FirstAidBuffCooldown.class).kill();
-		}
+	    if (Dungeon.level.map[pos] != Terrain.PIT && hero.hasTalent(Talent.ENERGY_REMAINS)) {
+	        int chance = Random.Int(6);
+	        int point = Dungeon.hero.pointsInTalent(Talent.ENERGY_REMAINS);
+	        switch (chance) {
+	            default:
+	                break;
+	            case 0:
+	                if (point >= 1) {
+	                    Buff.affect(hero, WandRechargeArea.class).setup(pos);
+	                }
+	                break;
+	            case 1:
+	                if (point >= 2) {
+	                    Buff.affect(hero, ArtifactRechargeArea.class).setup(pos);
+	                }
+	                break;
+	            case 2:
+	                if (point >= 3) {
+	                    Buff.affect(hero, BarrierRechargeArea.class).setup(pos);
+	                }
+	                break;
+	        }
+	    }
 
-		if ((this.alignment != Alignment.ALLY) && (cause == hero || cause instanceof Wand || cause instanceof DirectableAlly)) {
-			if (Dungeon.hero.hasTalent(Talent.LETHAL_RAGE)){
-				Berserk berserk = Buff.affect(hero, Berserk.class);
-				berserk.add(0.067f*Dungeon.hero.pointsInTalent(Talent.LETHAL_RAGE));
-			}
+	    if (hero.buff(FirstAidBuff.FirstAidBuffCooldown.class) != null) {
+	        hero.buff(FirstAidBuff.FirstAidBuffCooldown.class).kill();
+	    }
 
-			if (hero.hasTalent(Talent.SOUL_BULLET)) {
-				Buff.affect(hero, InfiniteBullet.class, hero.pointsInTalent(Talent.SOUL_BULLET));
-			}
+	    // ✅ 기존 조건 유지 + heroCausedKill로 확장(근접/활/완드/효과 전부)
+	    boolean heroCausedKill2 =
+	            (cause == hero)
+	            || (cause instanceof Weapon)
+	            || (cause instanceof Weapon.Enchantment)
+	            || (cause instanceof Wand)
+	            || (cause instanceof DirectableAlly);
 
-			if (hero.hasTalent(Talent.ADRENALINE_SURGE)) {
-				Buff.prolong(hero, Adrenaline.class, 1+2*hero.pointsInTalent(Talent.ADRENALINE_SURGE));
-			}
+	    if ((this.alignment != Alignment.ALLY) && heroCausedKill2) {
 
-			if (hero.hasTalent(Talent.PRAY_FOR_DEAD)) {
-				Buff.affect(hero, Talent.PrayForDeadTracker.class, Talent.PrayForDeadTracker.DURATION);
-			}
+	        if (Dungeon.hero.hasTalent(Talent.LETHAL_RAGE)){
+	            Berserk berserk = Buff.affect(hero, Berserk.class);
+	            berserk.add(0.067f*Dungeon.hero.pointsInTalent(Talent.LETHAL_RAGE));
+	        }
 
-			if (hero.buff(HorseRiding.RidingCooldown.class) != null) {
-				hero.buff(HorseRiding.RidingCooldown.class).kill();
-			}
+	        if (hero.hasTalent(Talent.SOUL_BULLET)) {
+	            Buff.affect(hero, InfiniteBullet.class, hero.pointsInTalent(Talent.SOUL_BULLET));
+	        }
 
-			if (hero.hasTalent(Talent.KINETIC_BATTLE)) {
-				Buff.affect(hero, Talent.KineticBattle.class).set();
-			}
+	        if (hero.hasTalent(Talent.ADRENALINE_SURGE)) {
+	            Buff.prolong(hero, Adrenaline.class, 1+2*hero.pointsInTalent(Talent.ADRENALINE_SURGE));
+	        }
 
-			if (hero.subClass == HeroSubClass.MEDICALOFFICER) {
-				Buff.affect(hero, Command.class).kill();
-			}
+	        if (hero.hasTalent(Talent.PRAY_FOR_DEAD)) {
+	            Buff.affect(hero, Talent.PrayForDeadTracker.class, Talent.PrayForDeadTracker.DURATION);
+	        }
 
-			if (Dungeon.hero.subClass == HeroSubClass.DEATHKNIGHT){
-				Buff.affect(Dungeon.hero, SoulCollect.class).killMob(this);
-			}
+	        if (hero.buff(HorseRiding.RidingCooldown.class) != null) {
+	            hero.buff(HorseRiding.RidingCooldown.class).kill();
+	        }
 
-			Juggling.kill();
+	        if (hero.hasTalent(Talent.KINETIC_BATTLE)) {
+	            Buff.affect(hero, Talent.KineticBattle.class).set();
+	        }
 
-			SharpShooterBuff.kill();
+	        if (hero.subClass == HeroSubClass.MEDICALOFFICER) {
+	            Buff.affect(hero, Command.class).kill();
+	        }
 
-			Saddle.kill(this);
-		}
+	        if (Dungeon.hero.subClass == HeroSubClass.DEATHKNIGHT){
+	            Buff.affect(Dungeon.hero, SoulCollect.class).killMob(this);
+	        }
 
-		if (cause instanceof Command.CASBomb && hero.subClass == HeroSubClass.MEDICALOFFICER) { //직접적인 데미지를 입히는 군의관의 영웅 능력으로 적을 처치해도 명령권을 얻으며, 이 경우 최대치를 넘을 수 있음
-			Buff.affect(hero, Command.class).kill(true);
-		}
+	        // ✅ 여기서 "어떤 킬이든" 저글링 트리거
+	        Juggling.kill();
 
-		if (Dungeon.hero.isAlive() && !Dungeon.level.heroFOV[pos]) {
-			GLog.i( Messages.get(this, "died") );
-		}
+	        SharpShooterBuff.kill();
+	        Saddle.kill(this);
+	    }
 
-		boolean soulMarked = buff(SoulMark.class) != null;
+	    if (cause instanceof Command.CASBomb && hero.subClass == HeroSubClass.MEDICALOFFICER) {
+	        Buff.affect(hero, Command.class).kill(true);
+	    }
 
-		super.die( cause );
+	    if (Dungeon.hero.isAlive() && !Dungeon.level.heroFOV[pos]) {
+	        GLog.i( Messages.get(this, "died") );
+	    }
 
-		if (!(this instanceof Wraith)
-				&& soulMarked
-				&& Random.Float() < (0.4f*Dungeon.hero.pointsInTalent(Talent.NECROMANCERS_MINIONS)/3f)){
-			Wraith w = Wraith.spawnAt(pos, Wraith.class);
-			if (w != null) {
-				Buff.affect(w, Corruption.class);
-				if (Dungeon.level.heroFOV[pos]) {
-					CellEmitter.get(pos).burst(ShadowParticle.CURSE, 6);
-					Sample.INSTANCE.play(Assets.Sounds.CURSED);
-				}
-			}
-		}
+	    boolean soulMarked = buff(SoulMark.class) != null;
 
-		if (!(this instanceof Wraith) && Dungeon.isChallenged(Challenges.CURSED_DUNGEON) && Random.Float() < 0.5f) {
-			Wraith w = Wraith.spawnAt(pos, Wraith.class);
-			if (Dungeon.level.heroFOV[pos]) {
-				CellEmitter.get(pos).burst(ShadowParticle.CURSE, 6);
-				Sample.INSTANCE.play(Assets.Sounds.CURSED);
-			}
-//			if (w != null) {
-//				Buff.affect(w, Corruption.class);
-//				if (Dungeon.level.heroFOV[pos]) {
-//					CellEmitter.get(pos).burst(ShadowParticle.CURSE, 6);
-//					Sample.INSTANCE.play(Assets.Sounds.CURSED);
-//				}
-//			}
-		}
+	    super.die( cause );
+
+	    if (!(this instanceof Wraith)
+	            && soulMarked
+	            && Random.Float() < (0.4f*Dungeon.hero.pointsInTalent(Talent.NECROMANCERS_MINIONS)/3f)){
+	        Wraith w = Wraith.spawnAt(pos, Wraith.class);
+	        if (w != null) {
+	            Buff.affect(w, Corruption.class);
+	            if (Dungeon.level.heroFOV[pos]) {
+	                CellEmitter.get(pos).burst(ShadowParticle.CURSE, 6);
+	                Sample.INSTANCE.play(Assets.Sounds.CURSED);
+	            }
+	        }
+	    }
+
+	    if (!(this instanceof Wraith) && Dungeon.isChallenged(Challenges.CURSED_DUNGEON) && Random.Float() < 0.5f) {
+	        Wraith w = Wraith.spawnAt(pos, Wraith.class);
+	        if (Dungeon.level.heroFOV[pos]) {
+	            CellEmitter.get(pos).burst(ShadowParticle.CURSE, 6);
+	            Sample.INSTANCE.play(Assets.Sounds.CURSED);
+	        }
+	    }
 	}
+
 
 	public float lootChance(){
 		float lootChance = this.lootChance;
