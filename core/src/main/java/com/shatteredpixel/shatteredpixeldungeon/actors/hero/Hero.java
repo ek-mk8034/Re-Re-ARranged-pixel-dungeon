@@ -3331,75 +3331,108 @@ public class Hero extends Char {
 	@Override
 	public void onAttackComplete() {
 
-		if (attackTarget == null){
-			curAction = null;
-			super.onAttackComplete();
-			return;
-		}
-		
-		AttackIndicator.target(attackTarget);
-		boolean wasEnemy = attackTarget.alignment == Alignment.ENEMY
-				|| (attackTarget instanceof Mimic && attackTarget.alignment == Alignment.NEUTRAL);
+	    if (attackTarget == null){
+	        curAction = null;
+	        super.onAttackComplete();
+	        return;
+	    }
 
-		boolean hit = attack(attackTarget);
-		
-		Invisibility.dispel();
-		boolean useTurn = true;
-		if (buff(Talent.LethalMomentumTracker.class) != null){
-			buff(Talent.LethalMomentumTracker.class).detach();
-			useTurn = false;
-		}
+	    // ✅ (중요) 공격 처리 전에 타겟 참조/정보를 로컬로 잡아둠
+	    final Char target = attackTarget;
 
-		if (buff(Talent.CounterAttackTracker.class) != null && belongings.weapon == null) {
-			buff(Talent.CounterAttackTracker.class).detach();
-			useTurn = false;
-		}
+	    AttackIndicator.target(target);
+	    boolean wasEnemy = target.alignment == Alignment.ENEMY
+	            || (target instanceof Mimic && target.alignment == Alignment.NEUTRAL);
 
-		if (buff(Awakening.class) != null && buff(Awakening.class).isAwaken() && buff(Sheath.CriticalAttack.class) != null) {
-			useTurn = false;
-		}
+	    boolean hit = attack(target);
 
-		if (Sheath.isFlashSlash()) useTurn = false;
-		if (useTurn) {
-			spend( attackDelay() );
-		} else {
-			spend(0);
-		}
+	    Invisibility.dispel();
+	    boolean useTurn = true;
 
-		if (hit && subClass == HeroSubClass.GLADIATOR && wasEnemy){
-			Buff.affect( this, Combo.class ).hit(attackTarget);
-		}
+	    if (buff(Talent.LethalMomentumTracker.class) != null){
+	        buff(Talent.LethalMomentumTracker.class).detach();
+	        useTurn = false;
+	    }
 
-		if (hit && subClass == HeroSubClass.BATTLEMAGE && belongings.attackingWeapon() instanceof MagesStaff && hasTalent(Talent.BATTLE_MAGIC) && wasEnemy) {
-			Buff.affect( this, MagicalCombo.class).hit( attackTarget );
-		}
+	    if (buff(Talent.CounterAttackTracker.class) != null && belongings.weapon == null) {
+	        buff(Talent.CounterAttackTracker.class).detach();
+	        useTurn = false;
+	    }
 
-		if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
-			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
-		}
+	    if (buff(Awakening.class) != null && buff(Awakening.class).isAwaken()
+	            && buff(Sheath.CriticalAttack.class) != null) {
+	        useTurn = false;
+	    }
 
-		if (!hit && belongings.weapon == null && subClass == HeroSubClass.FIGHTER && Random.Int(5) == 0 && pointsInTalent(Talent.SWIFT_MOVEMENT) > 1) {
-			Buff.prolong(this, EvasiveMove.class, 0.9999f);
-		}
+	    if (Sheath.isFlashSlash()) useTurn = false;
 
-		if (buff(Sheath.Sheathing.class) != null) {
-			buff(Sheath.Sheathing.class).detach();
-			if (!attackTarget.isAlive() && Random.Float() < pointsInTalent(Talent.QUICK_SHEATHING)/3f) {
-				Buff.affect(this, Sheath.Sheathing.class);
-			}
-		}
-		
-		if (heroClass != HeroClass.SAMURAI && hasTalent(Talent.QUICK_SHEATHING) && !attackTarget.isAlive()) {
-			Buff.affect(this, Haste.class, 3f*pointsInTalent(Talent.QUICK_SHEATHING));
-		}
-		curAction = null;
-		attackTarget = null;
+	    if (useTurn) {
+	        spend( attackDelay() );
+	    } else {
+	        spend(0);
+	    }
 
-		if (buff(Sheath.CriticalAttack.class) != null) {
-			buff(Sheath.CriticalAttack.class).detach();
-		}
+	    if (hit && subClass == HeroSubClass.GLADIATOR && wasEnemy){
+	        Buff.affect(this, Combo.class).hit(target);
+	    }
 
-		super.onAttackComplete();
+	    if (hit && subClass == HeroSubClass.BATTLEMAGE
+	            && belongings.attackingWeapon() instanceof MagesStaff
+	            && hasTalent(Talent.BATTLE_MAGIC)
+	            && wasEnemy) {
+	        Buff.affect(this, MagicalCombo.class).hit(target);
+	    }
+
+	    if (hit && heroClass == HeroClass.DUELIST && wasEnemy){
+	        Buff.affect(this, Sai.ComboStrikeTracker.class).addHit();
+	    }
+
+	    if (!hit && belongings.weapon == null
+	            && subClass == HeroSubClass.FIGHTER
+	            && Random.Int(5) == 0
+	            && pointsInTalent(Talent.SWIFT_MOVEMENT) > 1) {
+	        Buff.prolong(this, EvasiveMove.class, 0.9999f);
+	    }
+
+	    // ==========================
+	    // ✅ Quick Sheathing (확실 동작 버전)
+	    // ==========================
+
+	    boolean killed = !target.isAlive();
+	    int quickPts = pointsInTalent(Talent.QUICK_SHEATHING);
+
+	    // 기존 Sheathing은 항상 정리 (기존 로직 유지 목적)
+	    Sheath.Sheathing sh = buff(Sheath.Sheathing.class);
+	    if (sh != null) sh.detach();
+
+	    // 🔥 사무라이는 "처치 시" 확률로 자동 납도 (버프/플래그 생명주기와 무관)
+	    if (heroClass == HeroClass.SAMURAI
+	            && killed
+	            && quickPts > 0
+	            && Random.Float() < quickPts / 3f) {
+
+	        // 이미 납도 상태면 중복 부여 안 함
+	        if (buff(Sheath.Sheathing.class) == null) {
+	            Buff.affect(this, Sheath.Sheathing.class);
+	        }
+	    }
+
+	    // Samurai가 아닌 경우(메타모포/타 클래스 사용)는 기존처럼 Haste
+	    if (heroClass != HeroClass.SAMURAI
+	            && killed
+	            && hasTalent(Talent.QUICK_SHEATHING)) {
+
+	        Buff.affect(this, Haste.class, 3f * pointsInTalent(Talent.QUICK_SHEATHING));
+	    }
+
+	    curAction = null;
+	    attackTarget = null;
+
+	    if (buff(Sheath.CriticalAttack.class) != null) {
+	        buff(Sheath.CriticalAttack.class).detach();
+	    }
+
+	    super.onAttackComplete();
 	}
 	
 	@Override

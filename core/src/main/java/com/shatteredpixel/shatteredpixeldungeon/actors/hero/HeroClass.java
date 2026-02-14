@@ -108,6 +108,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportat
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.HandyBarricade;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.WildEnergy;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfMagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Cudgel;
@@ -204,8 +205,9 @@ public enum HeroClass {
 		    new KingsCrown().collect();
 		    new OldAmulet().collect();
 
-		    new HandyBarricade().identify().quantity(20).collect();
+		    //new HandyBarricade().identify().quantity(20).collect();
 		    new WildEnergy().identify().quantity(20).collect();
+		    new StoneOfEnchantment().identify().quantity(20).collect();
 		}
 
 		// --------------------------------------------------
