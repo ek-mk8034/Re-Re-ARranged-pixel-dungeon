@@ -28,6 +28,13 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.ItemSlot;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
+
 public class WndInfoItem extends Window {
 	
 	private static final float GAP	= 2;
@@ -86,20 +93,35 @@ public class WndInfoItem extends Window {
 	}
 	
 	private void fillFields( Item item ) {
-		
-		int color = TITLE_COLOR;
-		if (item.levelKnown && item.level() > 0) {
-			color = ItemSlot.UPGRADED;
-		} else if (item.levelKnown && item.level() < 0) {
-			color = ItemSlot.DEGRADED;
-		}
+	    int color = TITLE_COLOR;
+	    int trueLvl   = item.visiblyUpgraded();
+	    int buffedLvl = item.buffedVisiblyUpgraded();
+	    if (item.levelKnown && (trueLvl != 0 || buffedLvl != 0)) {
+	        if (trueLvl == buffedLvl || buffedLvl <= 0) {
+	            if (buffedLvl > 0) {
+	                color = ItemSlot.UPGRADED;
+	            } else {
+	                color = ItemSlot.DEGRADED;
+	            }
+	        } else {
+	            color = (buffedLvl > trueLvl)
+	                    ? ItemSlot.ENHANCED
+	                    : ItemSlot.WARNING;
+	        }
+	    }
+	    IconTitle titlebar = new IconTitle(item);
 
-		IconTitle titlebar = new IconTitle( item );
-		titlebar.color( color );
-		
-		RenderedTextBlock txtInfo = PixelScene.renderTextBlock( item.info(), 6 );
-		
-		layoutFields(titlebar, txtInfo);
+	    if (item.levelKnown && buffedLvl != 0) {
+	        String baseName = item.name();
+	        // 기존 +숫자 제거
+	        baseName = baseName.replaceAll(" \\+\\d+", "");
+	        String newName = baseName + " +" + buffedLvl;
+	        titlebar.label(newName);
+	    }
+
+	    titlebar.color(color);
+	    RenderedTextBlock txtInfo = PixelScene.renderTextBlock(item.info(), 6);
+	    layoutFields(titlebar, txtInfo);
 	}
 
 	private void layoutFields(IconTitle title, RenderedTextBlock info){

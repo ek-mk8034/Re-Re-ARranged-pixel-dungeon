@@ -45,8 +45,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Smite;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.samurai.ShadowBlade;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
@@ -548,21 +550,37 @@ abstract public class Weapon extends KindOfWeapon {
 
 	@Override
 	public int buffedLvl() {
-		int lvl;
-		if (hero != null && (isEquipped(Dungeon.hero) || Dungeon.hero.belongings.contains(this))) {
-			lvl = super.buffedLvl();
-		} else {
-			lvl = level();
+
+	    int lvl;
+
+	    if (hero != null && (isEquipped(Dungeon.hero) || Dungeon.hero.belongings.contains(this))) {
+	        lvl = super.buffedLvl();
+	    } else {
+	        lvl = level();
+	    }
+
+	    if (hero != null) {
+	        WeaponEnhance weaponEnhance = hero.buff(WeaponEnhance.class);
+	        if (weaponEnhance != null && isEquipped(hero)) {
+	            lvl = weaponEnhance.weaponLevel(lvl);
+	        }
+	    }
+
+	    // ===== Warrior OldAmulet: BrokenSeal temporary +1 (현재 사용 무기만) =====
+		if (Dungeon.hero != null
+		        && Dungeon.hero.heroClass == HeroClass.WARRIOR
+		        && Dungeon.hero.belongings.attackingWeapon() == this) {  
+
+		    Armor a = Dungeon.hero.belongings.armor();
+		    if (a != null) {
+		        BrokenSeal seal = a.checkSeal();
+		        if (seal != null && seal.level() > 0 && seal.weaponSealLink()) {
+		            lvl += 1;
+		        }
+		    }
 		}
 
-		if (hero != null) {
-			WeaponEnhance weaponEnhance = hero.buff(WeaponEnhance.class);
-			if (weaponEnhance != null && isEquipped(hero)) {
-				lvl = weaponEnhance.weaponLevel(lvl);
-			}
-		}
-
-		return lvl;
+	    return lvl;
 	}
 
 	@Override
@@ -600,15 +618,25 @@ abstract public class Weapon extends KindOfWeapon {
 	
 	@Override
 	public String name() {
-		if (isEquipped(Dungeon.hero) && !hasCurseEnchant() && Dungeon.hero.buff(HolyWeapon.HolyWepBuff.class) != null
-			&& (Dungeon.hero.subClass != HeroSubClass.PALADIN || enchantment == null)){
-				return Messages.get(HolyWeapon.class, "ench_name", super.name());
-			} else {
-				return enchantment != null && (cursedKnown || !enchantment.curse()) ? enchantment.name(super.name()) : super.name();
 
-		}
+	    String baseName;
+
+	    if (isEquipped(Dungeon.hero) && !hasCurseEnchant()
+	            && Dungeon.hero.buff(HolyWeapon.HolyWepBuff.class) != null
+	            && (Dungeon.hero.subClass != HeroSubClass.PALADIN || enchantment == null)) {
+
+	        baseName = Messages.get(HolyWeapon.class, "ench_name", super.name());
+
+	    } else {
+
+	        baseName = (enchantment != null && (cursedKnown || !enchantment.curse()))
+	                ? enchantment.name(super.name())
+	                : super.name();
+	    }
+	    return baseName;
 	}
 	
+
 	@Override
 	public Item random() {
 		//+0: 75% (3/4)

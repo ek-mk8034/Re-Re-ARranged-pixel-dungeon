@@ -322,6 +322,8 @@ public class OldAmulet extends Item {
             return changeMachete((Machete) item);
         } else if (item instanceof KnightsShield) {
             return changeShield();
+        } else if (item instanceof BrokenSeal) {
+            return changeSeal((BrokenSeal) item);
         } else {
             return null;
         }
@@ -467,6 +469,13 @@ public class OldAmulet extends Item {
                 break;
         }
         return newItem;
+    }
+    
+    private static Item changeSeal(BrokenSeal seal) {
+        // OldAmulet blessing: while this seal is affixed and upgraded (+1),
+        // it also grants a temporary +1 bonus to the equipped weapon.
+        seal.enableWeaponSealLink();
+        return seal;
     }
 
     protected void onItemSelected(Item item) {

@@ -70,6 +70,17 @@ public class BrokenSeal extends Item {
 
 	private Armor.Glyph glyph;
 
+	// OldAmulet Warrior blessing (B 방식): OldAmulet로 연동 활성화 시에만 무기 임시 +1
+	private boolean weaponSealLink = false;
+
+	public void enableWeaponSealLink() {
+	    weaponSealLink = true;
+	}
+
+	public boolean weaponSealLink() {
+	    return weaponSealLink;
+	}
+
 	public boolean canTransferGlyph(){
 		if (glyph == null){
 			return false;
@@ -231,17 +242,20 @@ public class BrokenSeal extends Item {
 	};
 
 	private static final String GLYPH = "glyph";
+	private static final String WEAPON_SEAL_LINK = "weapon_seal_link";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
-		super.storeInBundle(bundle);
-		bundle.put(GLYPH, glyph);
+	    super.storeInBundle(bundle);
+	    bundle.put(GLYPH, glyph);
+	    bundle.put(WEAPON_SEAL_LINK, weaponSealLink);
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
-		super.restoreFromBundle(bundle);
-		glyph = (Armor.Glyph)bundle.get(GLYPH);
+	    super.restoreFromBundle(bundle);
+	    glyph = (Armor.Glyph) bundle.get(GLYPH);
+	    weaponSealLink = bundle.getBoolean(WEAPON_SEAL_LINK);
 	}
 
 	public static class WarriorShield extends ShieldBuff {
