@@ -11,7 +11,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.ArrowItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LuinBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.RuinBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.Bow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.BowWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.GreatBow;
@@ -233,7 +233,7 @@ public class Juggling extends Buff implements ActionIndicator.Action {
                     bow = new GreatBow();
                     break;
                 case 7:
-                    bow = new LuinBow();
+                    bow = new RuinBow();
                     break;
             }
         } else {

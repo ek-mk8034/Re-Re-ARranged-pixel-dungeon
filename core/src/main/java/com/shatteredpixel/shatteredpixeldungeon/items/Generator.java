@@ -255,7 +255,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.Tacti
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.TrueRunicBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.UnformedBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.UnholyBible;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LuinBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.RuinBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.Bow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.GreatBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.LongBow;
@@ -712,7 +712,7 @@ public class Generator {
 					BeamSaber.class,
 					SharpKatana.class,
 					AssassinsSpear.class,
-					LuinBow.class
+					RuinBow.class
 			};
 			WEP_AL_T6.defaultProbs = new float[]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 			WEP_AL_T6.probs = WEP_AL_T6.defaultProbs.clone();

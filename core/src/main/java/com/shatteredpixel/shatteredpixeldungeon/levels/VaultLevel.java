@@ -47,12 +47,9 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest.vault.VaultLa
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest.vault.VaultLongRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest.vault.VaultQuadrantsRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest.vault.VaultRingRoom;
-<<<<<<< HEAD
-=======
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest.vault.VaultRingsRoom;
+//import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest.vault.VaultRingsRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest.vault.VaultSimpleEnemyTreasureRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
->>>>>>> cdec67e8d (v3.3.6: implemented two new hazards for the vault, some WIP still)
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
@@ -70,8 +67,8 @@ public class VaultLevel extends CityLevel {
 			initRooms.add(new VaultCircleRoom());
 			initRooms.add(new VaultCrossRoom());
 			initRooms.add(new VaultQuadrantsRoom());
-			initRooms.add(new VaultEnemyCenterRoom());
-			initRooms.add(new VaultRingsRoom());
+			//initRooms.add(new VaultEnemyCenterRoom());
+			//initRooms.add(new VaultRingsRoom());
 			initRooms.add(new VaultSimpleEnemyTreasureRoom());
 			initRooms.add(new AlternatingTrapsRoom());
 			initRooms.add(new VaultLasersRoom());

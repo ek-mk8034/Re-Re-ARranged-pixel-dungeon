@@ -25,7 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.HolyS
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.HugeSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.Lance;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LanceNShield;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LuinBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.RuinBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.MeisterHammer;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ObsidianShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.RL_T6;
@@ -288,7 +288,7 @@ public class BluePrint extends Item {
             validIngredients.add( new UnholyBible().weaponRecipe() );
             validIngredients.add( new HugeSword().weaponRecipe() );
             validIngredients.add( new MeisterHammer().weaponRecipe() );
-            validIngredients.add( new LuinBow().weaponRecipe() );
+            validIngredients.add( new RuinBow().weaponRecipe() );
             validIngredients.add( new BeamSaber().weaponRecipe() );
             validIngredients.add( new HolySword().weaponRecipe() );
             validIngredients.add( new DualGreatSword().weaponRecipe() );
@@ -316,7 +316,7 @@ public class BluePrint extends Item {
             indexToOutput.put( 14, UnholyBible.class );
             indexToOutput.put( 15, HugeSword.class );
             indexToOutput.put( 16, MeisterHammer.class );
-            indexToOutput.put( 17, LuinBow.class );
+            indexToOutput.put( 17, RuinBow.class );
             indexToOutput.put( 18, BeamSaber.class );
             indexToOutput.put( 19, HolySword.class );
             indexToOutput.put( 20, DualGreatSword.class );

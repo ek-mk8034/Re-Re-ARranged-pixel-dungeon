@@ -1537,14 +1537,14 @@ public class ItemSpriteSheet {
 	public static final int BOW						= BOW_WEAPONS+2;
 	public static final int LONGBOW					= BOW_WEAPONS+3;
 	public static final int GREATBOW				= BOW_WEAPONS+4;
-	public static final int LUINBOW					= BOW_WEAPONS+5;
+	public static final int RUINBOW					= BOW_WEAPONS+5;
 	static {
 		assignItemRect(WORN_SHORTBOW, 12, 12);
 		assignItemRect(SHORTBOW		, 13, 13);
 		assignItemRect(BOW			, 15, 15);
 		assignItemRect(LONGBOW		, 16, 16);
 		assignItemRect(GREATBOW		, 16, 16);
-		assignItemRect(LUINBOW		, 16, 16);
+		assignItemRect(RUINBOW		, 16, 16);
 	}
 
 	private static final int ARROW_WEAPONS			=	xy(1, 74);

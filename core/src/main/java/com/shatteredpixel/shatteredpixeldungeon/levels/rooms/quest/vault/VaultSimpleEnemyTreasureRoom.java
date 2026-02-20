@@ -1,6 +1,6 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.quest.vault;
 
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.VaultRat;
+//import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.VaultRat;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -79,9 +79,9 @@ public class VaultSimpleEnemyTreasureRoom extends StandardRoom {
 			door.set( Door.Type.REGULAR );
 		}
 
-		VaultRat rat = new VaultRat();
-		rat.pos = ratPos;
-		level.mobs.add(rat);
+		//VaultRat rat = new VaultRat();
+		//rat.pos = ratPos;
+		//level.mobs.add(rat);
 
 	}
 
