@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.HolyS
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.HugeSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.Lance;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LanceNShield;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LuinBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.MeisterHammer;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ObsidianShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.RL_T6;
@@ -287,6 +288,7 @@ public class BluePrint extends Item {
             validIngredients.add( new UnholyBible().weaponRecipe() );
             validIngredients.add( new HugeSword().weaponRecipe() );
             validIngredients.add( new MeisterHammer().weaponRecipe() );
+            validIngredients.add( new LuinBow().weaponRecipe() );
             validIngredients.add( new BeamSaber().weaponRecipe() );
             validIngredients.add( new HolySword().weaponRecipe() );
             validIngredients.add( new DualGreatSword().weaponRecipe() );
@@ -314,12 +316,13 @@ public class BluePrint extends Item {
             indexToOutput.put( 14, UnholyBible.class );
             indexToOutput.put( 15, HugeSword.class );
             indexToOutput.put( 16, MeisterHammer.class );
-            indexToOutput.put( 17, BeamSaber.class );
-            indexToOutput.put( 18, HolySword.class );
-            indexToOutput.put( 19, DualGreatSword.class );
-            indexToOutput.put( 20, SharpKatana.class );
-            indexToOutput.put( 21, GL_T6.class );
-            indexToOutput.put( 22, RL_T6.class );
+            indexToOutput.put( 17, LuinBow.class );
+            indexToOutput.put( 18, BeamSaber.class );
+            indexToOutput.put( 19, HolySword.class );
+            indexToOutput.put( 20, DualGreatSword.class );
+            indexToOutput.put( 21, SharpKatana.class );
+            indexToOutput.put( 22, GL_T6.class );
+            indexToOutput.put( 23, RL_T6.class );
         }
 
         public static final LinkedHashMap<Integer, Integer> costs = new LinkedHashMap<>(); //validIngredients 배열의 인덱스를 넣으면 연금술 에너지 필요량을 반환한다.
@@ -341,12 +344,13 @@ public class BluePrint extends Item {
             costs.put( 14, 0 );
             costs.put( 15, 0 );
             costs.put( 16, 0 );
-            costs.put( 17, 0 );
-            costs.put( 18, 5 );
+            costs.put( 17, 5 );
+            costs.put( 18, 0 );
             costs.put( 19, 5 );
-            costs.put( 20, 0 );
+            costs.put( 20, 5 );
             costs.put( 21, 0 );
             costs.put( 22, 0 );
+            costs.put( 23, 0 );
         }
 
         public ArrayList<Class<?extends Item>> ingredientToArray(ArrayList<Item> ingredients) { //연금술 솥에 넣은 아이템들의 '클래스'를 배열로 만든다.

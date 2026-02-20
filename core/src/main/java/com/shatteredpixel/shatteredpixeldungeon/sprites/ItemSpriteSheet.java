@@ -1010,16 +1010,20 @@ public class ItemSpriteSheet {
 
 	private static final int NEW_WEP_TIER_4 =			xy(9, 46);  //8 slots
 	public static final int LONG_KATANA		= NEW_WEP_TIER_4+0;
+	public static final int LUNAR_KATANA	= NEW_WEP_TIER_4+1;
 	static{
 		assignItemRect(LONG_KATANA, 15, 16);
+		assignItemRect(LUNAR_KATANA, 15, 16);
 	}
 
 	private static final int NEW_WEP_TIER_5	=			xy(1, 47);  //8 slots
 	public static final int LARGE_KATANA= NEW_WEP_TIER_5+0;
-	public static final int LARGE_SHORD	= NEW_WEP_TIER_5+1;
+	public static final int LARGE_SWORD	= NEW_WEP_TIER_5+1;
+	public static final int RED_SWORD	= NEW_WEP_TIER_5+2;
 	static{
 		assignItemRect(LARGE_KATANA	, 12, 16);
-		assignItemRect(LARGE_SHORD	, 14, 16);
+		assignItemRect(LARGE_SWORD	, 14, 16);
+		assignItemRect(RED_SWORD	, 14, 16);
 	}
 
 //	private static final int NEW_WEP_TIER_6	=			xy(9, 47);  //8 slots
@@ -1533,12 +1537,14 @@ public class ItemSpriteSheet {
 	public static final int BOW						= BOW_WEAPONS+2;
 	public static final int LONGBOW					= BOW_WEAPONS+3;
 	public static final int GREATBOW				= BOW_WEAPONS+4;
+	public static final int LUINBOW					= BOW_WEAPONS+5;
 	static {
 		assignItemRect(WORN_SHORTBOW, 12, 12);
 		assignItemRect(SHORTBOW		, 13, 13);
 		assignItemRect(BOW			, 15, 15);
 		assignItemRect(LONGBOW		, 16, 16);
 		assignItemRect(GREATBOW		, 16, 16);
+		assignItemRect(LUINBOW		, 16, 16);
 	}
 
 	private static final int ARROW_WEAPONS			=	xy(1, 74);

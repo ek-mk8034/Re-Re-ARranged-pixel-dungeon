@@ -44,7 +44,7 @@ import java.text.DecimalFormat;
 public class LargeSword extends MeleeWeapon {
 
 	{
-		image = ItemSpriteSheet.LARGE_SHORD;
+		image = ItemSpriteSheet.LARGE_SWORD;
 		hitSound = Assets.Sounds.HIT_SLASH;
 		hitSoundPitch = 0.8f;
 
