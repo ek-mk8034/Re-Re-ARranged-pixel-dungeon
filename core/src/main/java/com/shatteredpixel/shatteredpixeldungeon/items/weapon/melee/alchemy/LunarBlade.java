@@ -4,6 +4,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Frost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -19,20 +20,14 @@ import com.watabou.utils.Bundle;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-/**
- * Lunar Blade (월영도) - Tier 6 Alchemy weapon
- * Recipe: LargeKatana + Evolution + UpgradeDust
- *
- * Mechanic:
- * - Count successful hits globally (not per target).
- * - On the 6th successful hit: apply Frost (normal enemies) or Chill (bosses), then reset.
- */
 public class LunarBlade extends MeleeWeapon implements AlchemyWeapon {
 
-    // 0~5, 6번째 성공타에서 발동 후 0으로 리셋
     private int moonCharge = 0;
-
     private static final String MOON_CHARGE = "moonCharge";
+
+    private static final int TRIGGER_HITS = 5;
+    private static final float FROST_DURATION = 12f;
+    private static final float CHILL_DURATION_BOSS = 10f;
 
     {
         tier = 6;
@@ -52,7 +47,6 @@ public class LunarBlade extends MeleeWeapon implements AlchemyWeapon {
         return 5 * (tier + 2) + lvl * (tier + 2);
     }
 
-    // LargeKatana 계열 듀얼리스트 능력 유지(같은 계열 느낌)
     @Override
     protected void duelistAbility(Hero hero, Integer target) {
         NormalKatana.flashSlashAbility(hero, target, 0.4f, this);
@@ -67,29 +61,25 @@ public class LunarBlade extends MeleeWeapon implements AlchemyWeapon {
         }
     }
 
-    /**
-     * 핵심: 6번째 성공타에 상태이상 발동
-     * - 보스는 Frost(완전 빙결) 대신 Chill로 다운그레이드
-     */
     @Override
     public int proc(Char attacker, Char defender, int damage) {
 
         damage = super.proc(attacker, defender, damage);
 
-        // “성공한 공격”만 카운트: damage > 0 이면 명중/유효타로 간주
         if (damage > 0 && attacker instanceof Hero) {
 
             moonCharge++;
 
-            if (moonCharge >= 6) {
+            if (moonCharge >= TRIGGER_HITS) {
                 moonCharge = 0;
 
                 if (defender.properties().contains(Char.Property.BOSS)) {
-                    // 보스 예외처리: 완전 행동불가(Frost) 대신 감속(Chill)
-                    Buff.affect(defender, Chill.class, 3f);
+                    Buff.affect(defender, Chill.class, CHILL_DURATION_BOSS);
                 } else {
-                    // 일반 몹: 짧은 Frost
-                    Buff.affect(defender, Frost.class, 2f);
+                    // 타격으로 바로 깨지는 문제 방지: WandOfFrost 방식으로 1틱 지연 적용
+                    if (defender.buff(Frost.class) == null) {
+                        delayFreeze(defender);
+                    }
                 }
             }
         }
@@ -97,15 +87,24 @@ public class LunarBlade extends MeleeWeapon implements AlchemyWeapon {
         return damage;
     }
 
-    // ─────────────────────────────────────────
-    // Alchemy blueprint recipe/hint
-    // ─────────────────────────────────────────
+    private void delayFreeze(final Char target) {
+        new FlavourBuff() {
+            { actPriority = VFX_PRIO; }
+
+            @Override
+            public boolean act() {
+                Buff.affect(target, Frost.class, FROST_DURATION);
+                return super.act();
+            }
+        }.attachTo(target);
+    }
+
     @Override
     public ArrayList<Class<? extends Item>> weaponRecipe() {
         return new ArrayList<>(Arrays.asList(
                 LargeKatana.class,
-                UpgradeDust.class,
-                Evolution.class
+                Evolution.class,
+                UpgradeDust.class
         ));
     }
 
@@ -118,14 +117,9 @@ public class LunarBlade extends MeleeWeapon implements AlchemyWeapon {
     public String desc() {
         String info = super.desc();
         info += "\n\n" + AlchemyWeapon.hintString(weaponRecipe());
-        // 원하면 strings에 설명 키 추가해서 월광 충전 메커니즘 안내 가능
-        // info += "\n\n" + Messages.get(this, "mooncharge_desc");
         return info;
     }
 
-    // ─────────────────────────────────────────
-    // Save / Load
-    // ─────────────────────────────────────────
     @Override
     public void storeInBundle(Bundle bundle) {
         super.storeInBundle(bundle);
