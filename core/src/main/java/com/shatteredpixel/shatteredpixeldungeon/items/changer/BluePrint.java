@@ -323,7 +323,7 @@ public class BluePrint extends Item {
             indexToOutput.put( 19, HolySword.class );
             indexToOutput.put( 20, DualGreatSword.class );
             indexToOutput.put( 21, SharpKatana.class );
-            indexToOutput.put( 22, LunarKatana.class );
+            indexToOutput.put( 22, LunarBlade.class );
             indexToOutput.put( 23, GL_T6.class );
             indexToOutput.put( 24, RL_T6.class );
         }
