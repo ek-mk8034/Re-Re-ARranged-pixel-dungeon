@@ -103,8 +103,8 @@ public class LunarBlade extends MeleeWeapon implements AlchemyWeapon {
     public ArrayList<Class<? extends Item>> weaponRecipe() {
         return new ArrayList<>(Arrays.asList(
                 LargeKatana.class,
-                Evolution.class,
-                UpgradeDust.class
+                UpgradeDust.class,
+                Evolution.class 
         ));
     }
 
