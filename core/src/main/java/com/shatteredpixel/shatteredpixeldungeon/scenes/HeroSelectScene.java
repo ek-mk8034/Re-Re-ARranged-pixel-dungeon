@@ -824,13 +824,29 @@ public class HeroSelectScene extends PixelScene {
 						return;
 					}
 
-					ShatteredPixelDungeon.scene().addToFront(new WndChallenges(SPDSettings.challenges(), true) {
-						public void onBackPressed() {
-							super.onBackPressed();
-							icon(Icons.get(SPDSettings.challenges() > 0 ? Icons.CHALLENGE_COLOR : Icons.CHALLENGE_GREY));
-							updateOptionsColor();
-						}
-					} );
+					WndChallenges w = new WndChallenges(SPDSettings.challenges(), true) {
+					    @Override
+					    public void onBackPressed() {
+					        super.onBackPressed();
+					        icon(Icons.get(SPDSettings.challenges() > 0 ? Icons.CHALLENGE_COLOR : Icons.CHALLENGE_GREY));
+					        updateOptionsColor();
+					    }
+					};
+
+					// 가로 모드에서 safe area 중앙으로 오도록 위치 보정
+					if (PixelScene.landscape()) {
+
+					    float top = 0, bottom = 0;
+					    if (insets != null) {
+					        top = insets.top;
+					        bottom = insets.bottom;
+					    }
+
+					    float dy = (top - bottom) / 2f;
+					    if (dy != 0) w.offset(0, Math.round(dy));
+					}
+
+					ShatteredPixelDungeon.scene().addToFront(w);
 				}
 			};
 			challengeButton.leftJustify = true;

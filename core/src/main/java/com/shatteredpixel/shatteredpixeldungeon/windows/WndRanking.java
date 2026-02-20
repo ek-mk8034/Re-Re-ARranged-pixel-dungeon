@@ -435,46 +435,77 @@ public class WndRanking extends WndTabbed {
 		}
 	}
 
-	private class ChallengesTab extends Group{
+	private class ChallengesTab extends Group {
+		private String ellipsize(String s, int maxPixelW){
+		    // 대략적인 폭 추정용: 폰트/렌더러 접근이 어려우니 “글자 수 기반”으로 안전하게 자름
+		    // 한국어 기준으로도 크게 안 어긋남. 필요하면 더 빡세게 줄이면 됨.
+		    // colW가 줄어드는 가로모드에서만 잘리니까, 여기서는 보수적으로 처리.
 
-		public ChallengesTab(){
-			super();
+		    // 아주 거친 근사: 글자 하나당 약 6px로 가정(ROW_H=9 UI 기준)
+		    int maxChars = Math.max(3, maxPixelW / 6);
 
-			camera = WndRanking.this.camera;
-
-			float pos = 0;
-
-			for (int i=0; i < Challenges.NAME_IDS.length; i++) {
-
-				final String challenge = Challenges.NAME_IDS[i];
-
-				MiniCheckBox cb = new MiniCheckBox( Messages.titleCase(Messages.get(Challenges.class, challenge)) );
-				cb.checked( (Dungeon.challenges & Challenges.MASKS[i]) != 0 );
-				cb.active = false;
-
-				if (i > 0) {
-					pos += 1;
-				}
-				cb.setRect( 0, pos, WIDTH-9, 9 );
-
-				add( cb );
-
-				IconButton info = new IconButton(Icons.get(Icons.MINI_INFO)){
-					@Override
-					protected void onClick() {
-						super.onClick();
-						ShatteredPixelDungeon.scene().add(
-								new WndMessage(Messages.get(Challenges.class, challenge+"_desc"))
-						);
-					}
-				};
-				info.setRect(cb.right(), pos, 9, 9);
-				add(info);
-
-				pos = cb.bottom();
-			}
+		    if (s.length() <= maxChars) return s;
+		    return s.substring(0, Math.max(1, maxChars - 1)) + "…";
 		}
 
+	    public ChallengesTab() {
+	        super();
+
+	        camera = WndRanking.this.camera;
+
+	        final int ROW_H   = 9;
+	        final int GAP     = 1;
+	        final int INFO_W  = 9;
+	        final int COL_GAP = 3;
+
+	        int n = Challenges.NAME_IDS.length;
+
+	        float singleH = n * ROW_H + Math.max(0, n - 1) * GAP;
+	        float maxH = HEIGHT;
+
+	        int cols = 1;
+	        if (singleH > maxH){
+	            cols = (int)Math.ceil(singleH / maxH);
+	            if (cols < 2) cols = 2;
+	            if (cols > 3) cols = 3;
+	        }
+
+	        int rows = (int)Math.ceil(n / (float)cols);
+
+	        float colW = (WIDTH - COL_GAP * (cols - 1)) / (float)cols;
+
+	        for (int i = 0; i < n; i++) {
+
+	            final String challenge = Challenges.NAME_IDS[i];
+
+	            int col = i / rows;
+	            int row = i % rows;
+
+	            float x = col * (colW + COL_GAP);
+	            float y = row * (ROW_H + GAP);
+
+	            String label = Messages.titleCase(Messages.get(Challenges.class, challenge));
+				label = ellipsize(label, (int)(colW - INFO_W - 2)); // 2는 여유
+				MiniCheckBox cb = new MiniCheckBox(label);
+	            cb.checked((Dungeon.challenges & Challenges.MASKS[i]) != 0);
+	            cb.active = false;
+
+	            cb.setRect(x, y, colW - INFO_W, ROW_H);
+	            add(cb);
+
+	            IconButton info = new IconButton(Icons.get(Icons.MINI_INFO)){
+	                @Override
+	                protected void onClick() {
+	                    super.onClick();
+	                    ShatteredPixelDungeon.scene().add(
+	                            new WndMessage(Messages.get(Challenges.class, challenge + "_desc"))
+	                    );
+	                }
+	            };
+	            info.setRect(cb.right(), y, INFO_W, ROW_H);
+	            add(info);
+	        }
+	    }
 	}
 
 	private class ItemButton extends Button {
