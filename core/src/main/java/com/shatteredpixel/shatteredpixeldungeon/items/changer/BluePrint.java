@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.HolyS
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.HugeSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.Lance;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LanceNShield;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LunarBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.RuinBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.MeisterHammer;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ObsidianShield;
@@ -293,6 +294,7 @@ public class BluePrint extends Item {
             validIngredients.add( new HolySword().weaponRecipe() );
             validIngredients.add( new DualGreatSword().weaponRecipe() );
             validIngredients.add( new SharpKatana().weaponRecipe() );
+            validIngredients.add( new LunarBlade().weaponRecipe() );
             validIngredients.add( new GL_T6().weaponRecipe() );
             validIngredients.add( new RL_T6().weaponRecipe() );
         }
@@ -321,8 +323,9 @@ public class BluePrint extends Item {
             indexToOutput.put( 19, HolySword.class );
             indexToOutput.put( 20, DualGreatSword.class );
             indexToOutput.put( 21, SharpKatana.class );
-            indexToOutput.put( 22, GL_T6.class );
-            indexToOutput.put( 23, RL_T6.class );
+            indexToOutput.put( 22, LunarKatana.class );
+            indexToOutput.put( 23, GL_T6.class );
+            indexToOutput.put( 24, RL_T6.class );
         }
 
         public static final LinkedHashMap<Integer, Integer> costs = new LinkedHashMap<>(); //validIngredients 배열의 인덱스를 넣으면 연금술 에너지 필요량을 반환한다.
@@ -351,6 +354,7 @@ public class BluePrint extends Item {
             costs.put( 21, 0 );
             costs.put( 22, 0 );
             costs.put( 23, 0 );
+            costs.put( 24, 0 );
         }
 
         public ArrayList<Class<?extends Item>> ingredientToArray(ArrayList<Item> ingredients) { //연금술 솥에 넣은 아이템들의 '클래스'를 배열로 만든다.

@@ -245,6 +245,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.HolyS
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.HugeSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.Lance;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LanceNShield;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LunarBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.MeisterHammer;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ObsidianShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.RL_T6;
@@ -705,6 +706,7 @@ public class Generator {
 					ChainFlail.class,
 					ForceGlove.class,
 					Lance.class,
+					LunarBlade.class,
 					ObsidianShield.class,
 					DualGreatSword.class,
 					HugeSword.class,
