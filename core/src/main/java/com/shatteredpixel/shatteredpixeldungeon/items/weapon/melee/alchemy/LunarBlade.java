@@ -9,10 +9,11 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Frost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.UpgradeDust;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LargeKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.NormalKatana;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RunicBlade;
+
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.utils.Bundle;
@@ -26,6 +27,7 @@ public class LunarBlade extends MeleeWeapon implements AlchemyWeapon {
     private static final String MOON_CHARGE = "moonCharge";
 
     private static final int TRIGGER_HITS = 5;
+
     private static final float FROST_DURATION = 12f;
     private static final float CHILL_DURATION_BOSS = 10f;
 
@@ -73,6 +75,7 @@ public class LunarBlade extends MeleeWeapon implements AlchemyWeapon {
             if (moonCharge >= TRIGGER_HITS) {
                 moonCharge = 0;
 
+                // 보스는 하드 CC 방지: Chill
                 if (defender.properties().contains(Char.Property.BOSS)) {
                     Buff.affect(defender, Chill.class, CHILL_DURATION_BOSS);
                 } else {
@@ -103,8 +106,8 @@ public class LunarBlade extends MeleeWeapon implements AlchemyWeapon {
     public ArrayList<Class<? extends Item>> weaponRecipe() {
         return new ArrayList<>(Arrays.asList(
                 LargeKatana.class,
-                UpgradeDust.class,
-                Evolution.class 
+                RunicBlade.class,   
+                Evolution.class
         ));
     }
 

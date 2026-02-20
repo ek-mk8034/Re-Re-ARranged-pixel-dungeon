@@ -125,6 +125,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Shovel;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LargeKatana;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RunicBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LunarBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.TacticalShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.WornShortBow;
@@ -209,7 +210,7 @@ public enum HeroClass {
 		    new KingsCrown().collect();
 		    new OldAmulet().collect();
 
-		    new LunarBlade().identify().collect();
+		    new RunicBlade().identify().collect();
 		    new UpgradeDust().identify().quantity(10);
 		    new Evolution().identify().quantity(5).collect();
 		    new LargeKatana().identify().upgrade(5).collect();
