@@ -4,20 +4,28 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BowMasterSkill;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.GreaterHaste;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SharpShooterBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.AlchemyWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.BowWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.GreatBow;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class RuinBow extends BowWeapon implements AlchemyWeapon {
 
@@ -26,18 +34,10 @@ public class RuinBow extends BowWeapon implements AlchemyWeapon {
         image = ItemSpriteSheet.RUINBOW;
     }
 
-    // 1.1x faster => delay * (1/1.1)
     @Override
     public float delayFactor(Char owner) {
+        // 1.1x faster
         return super.delayFactor(owner) * (1f / 1.1f);
-    }
-
-    // ✅ nested class name must be qualified (not "Arrow")
-    @Override
-    public BowWeapon.Arrow knockArrow() {
-        RuinRayArrow a = new RuinRayArrow();
-        a.reset(this);
-        return a;
     }
 
     @Override
@@ -45,14 +45,13 @@ public class RuinBow extends BowWeapon implements AlchemyWeapon {
         return dst;
     }
 
-    // ✅ avoid Arrays.asList generic inference issues
     @Override
     public ArrayList<Class<? extends Item>> weaponRecipe() {
-        ArrayList<Class<? extends Item>> list = new ArrayList<>();
-        list.add(GreatBow.class);
-        list.add(WandOfDisintegration.class);
-        list.add(Evolution.class);
-        return list;
+        return new ArrayList<>(Arrays.asList(
+                GreatBow.class,
+                Evolution.class,
+                WandOfDisintegration.class
+        ));
     }
 
     @Override
@@ -67,7 +66,20 @@ public class RuinBow extends BowWeapon implements AlchemyWeapon {
         return info;
     }
 
+    @Override
+    public Arrow knockArrow() {
+        RuinRayArrow a = new RuinRayArrow();
+        a.reset(this);
+        return a;
+    }
+
     public static class RuinRayArrow extends BowWeapon.Arrow {
+
+        // 이번 발사에서 소모될 탄약(관통 기반)
+        private int ammoCost = 1;
+
+        // 현재 타겟에 적용할 관통 배율(관통 기반)
+        private float shotMult = 1f;
 
         @Override
         public int throwPos(Hero user, int dst) {
@@ -77,6 +89,19 @@ public class RuinBow extends BowWeapon implements AlchemyWeapon {
         @Override
         public int targetingPos(Hero user, int dst) {
             return dst;
+        }
+
+        /**
+         * 필중 제거 핵심:
+         * - 각 타겟에 대해 curUser.shoot(target, this)를 호출해서
+         *   기본 활의 명중/회피 계산을 그대로 탄다.
+         * - 관통 배율은 shoot()의 데미지 흐름에서 proc()가 호출되므로,
+         *   proc()에서 마지막에 배율을 곱해준다.
+         */
+        @Override
+        public int proc(Char attacker, Char defender, int damage) {
+            damage = super.proc(attacker, defender, damage);
+            return Math.round(damage * shotMult);
         }
 
         @Override
@@ -89,55 +114,183 @@ public class RuinBow extends BowWeapon implements AlchemyWeapon {
 
             Hero hero = (Hero) curUser;
 
+            // ✅ 붙어있어도 발사 허용 (dist==1 OK). 자기 자신(0)만 무시.
+            Ballistica pre = new Ballistica(hero.pos, cell, Ballistica.PROJECTILE);
+            if (pre.dist <= 0) return;
+
+            // 빔 트레이스
             Ballistica beam = new Ballistica(hero.pos, cell, Ballistica.WONT_STOP);
 
-            int maxDist = Math.min(distance(), beam.dist);
+            // ✅ “목표 지점(cell)”까지만 처리하도록 clamp
+            int endDist = endDistToCell(beam, cell);
 
-            int solidPassed = 0;
-            int enemiesHit = 0;
+            // ─────────────────────────────────────────────
+            // 1) Dry-run: 탄약 비용 계산(관통 기반)
+            //   - solid은 “연속 구간”을 1회 관통으로 계산
+            //   - 적은 두 번째부터 관통 1회로 계산 (enemiesSeen-1)
+            // ─────────────────────────────────────────────
+            int solidBlocks = 0;
+            int enemiesSeen = 0;
+            boolean wasSolid = false;
 
-            for (int c : beam.subPath(1, maxDist)) {
+            for (int c : beam.subPath(1, endDist)) {
 
-                if (Dungeon.level.solid[c]) solidPassed++;
+                boolean isSolid = Dungeon.level.solid[c];
+                if (isSolid && !wasSolid) {
+                    solidBlocks++;               // ✅ 장애물 “덩어리” 단위 카운트
+                }
+                wasSolid = isSolid;
 
                 Char ch = Actor.findChar(c);
                 if (ch != null && ch != hero) {
-                    enemiesHit++;
 
-                    float mult = damageMultiplier(solidPassed, enemiesHit);
+                    // 패시브/미탐색 보호
+                    if (ch instanceof Mob
+                            && ((Mob) ch).state == ((Mob) ch).PASSIVE
+                            && !(Dungeon.level.mapped[c] || Dungeon.level.visited[c])) {
+                        continue;
+                    }
 
-                    int dmg = damageRoll(hero);
-                    dmg = Math.round(dmg * mult);
-
-                    dmg = proc(hero, ch, dmg);
-                    ch.damage(dmg, this);
-
-                    // SPD 계열에서 ranged lethal 훅이 있으면 그대로 유지(너 포크에 있길래 남김)
-                    com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SharpShooterBuff
-                            .rangedLethal(ch, isBurst, this);
+                    enemiesSeen++;
                 }
             }
 
-            Sample.INSTANCE.play(Assets.Sounds.HIT_MAGIC, 1f, Random.Float(0.95f, 1.05f));
+            int penetrations = solidBlocks + Math.max(0, enemiesSeen - 1);
+            ammoCost = ammoCostByPenetrations(penetrations);
 
-            onShoot(); // 탄환 소모/피로 등 BowWeapon.Arrow 기본 처리
-        }
+            if (useBullet && Dungeon.bullet < ammoCost) {
+                GLog.w(Messages.get(BowWeapon.class, "no_arrow"));
+                return;
+            }
 
-        // wand: lvl*2 + 6, 우리는 약간 하향
-        private int distance() {
-            return buffedLvl() * 2 + 4;
-        }
+            // ─────────────────────────────────────────────
+            // 2) Real pass: 타격(정확도 적용) + 데미지(관통당)
+            // ─────────────────────────────────────────────
+            solidBlocks = 0;
+            enemiesSeen = 0;
+            wasSolid = false;
 
-        // stack = solidPassed + (enemiesHit-1), +4% per stack, cap 2.0x
-        private float damageMultiplier(int solidPassed, int enemiesHit) {
-            int stacks = solidPassed + Math.max(0, enemiesHit - 1);
-            float mult = 1f + 0.04f * stacks;
-            return Math.min(mult, 2.0f);
+            for (int c : beam.subPath(1, endDist)) {
+
+                boolean isSolid = Dungeon.level.solid[c];
+                if (isSolid && !wasSolid) {
+                    solidBlocks++;
+                }
+                wasSolid = isSolid;
+
+                Char ch = Actor.findChar(c);
+                if (ch != null && ch != hero) {
+
+                    if (ch instanceof Mob
+                            && ((Mob) ch).state == ((Mob) ch).PASSIVE
+                            && !(Dungeon.level.mapped[c] || Dungeon.level.visited[c])) {
+                        continue;
+                    }
+
+                    enemiesSeen++;
+
+                    // ✅ 관통당 +10% (cap 2.0) — “칸수”가 아니라 관통(덩어리/대상) 기반
+                    shotMult = damageMultiplier(solidBlocks, enemiesSeen);
+
+                    // ✅ 기존 활 정확도/회피 적용(필중 제거)
+                    boolean hit = curUser.shoot(ch, this);
+
+                    // 기존 활 훅 유지
+                    SharpShooterBuff.rangedLethal(ch, isBurst, this);
+
+                    if (hit && !ch.isAlive() && isBurst && Dungeon.hero.hasTalent(Talent.HURRICANE)) {
+                        Buff.affect(Dungeon.hero, GreaterHaste.class)
+                                .set(1 + Dungeon.hero.pointsInTalent(Talent.HURRICANE));
+                    }
+                }
+            }
+
+            Sample.INSTANCE.play(Assets.Sounds.HIT_MAGIC, 1, Random.Float(0.95f, 1.05f));
+
+            // 빔: 화살 드랍/핀 없음
+            onShoot();
         }
 
         @Override
         public void dropArrow(int cell) {
-            // no-op (beam)
+            // 빔이라 드랍 없음
+        }
+
+        /**
+         * 목표 cell까지만 가도록 endDist를 찾아낸다.
+         * Ballistica가 어떤 이유로든 맵 끝까지 뻗는 케이스를 강제 clamp.
+         */
+        private int endDistToCell(Ballistica beam, int targetCell) {
+            int end = beam.dist;
+
+            // BowWeapon에서 trajectory.path.get(...) 를 쓰는 걸 보면,
+            // path는 List<Integer> 형태임.
+            if (beam.path != null) {
+                int max = Math.min(beam.dist, beam.path.size() - 1);
+                for (int i = 1; i <= max; i++) {
+                    if (beam.path.get(i) == targetCell) {
+                        end = i;
+                        break;
+                    }
+                }
+            }
+            return end;
+        }
+
+        /**
+         * 데미지 배율: 관통 스택당 +10%, cap 2.0
+         * stacks = solidBlocks + max(0, enemiesSeen-1)
+         */
+        private float damageMultiplier(int solidBlocks, int enemiesSeen) {
+            int stacks = solidBlocks + Math.max(0, enemiesSeen - 1);
+            float mult = 1f + 0.10f * stacks;
+            return Math.min(mult, 2.0f);
+        }
+
+        /**
+         * 탄약 소모(관통 기반, cap 20)
+         * p=0 -> 1
+         * p>=1 -> p*(p+3)/2  (1->3, 2->7, 3->12 ...)
+         */
+        private int ammoCostByPenetrations(int p) {
+            int cost = (p <= 0) ? 1 : (p * (p + 5)) / 2;
+            return Math.min(25, cost);
+        }
+
+        /**
+         * BowWeapon.Arrow.onShoot() 오버라이드:
+         * - 1발이 아니라 ammoCost만큼 소모
+         * - 스펙터 애로우 환급 제거
+         * - 나머지(피로/보우마스터/관통샷 해제)는 유지
+         */
+        @Override
+        public void onShoot() {
+
+            if (useBullet) {
+                Dungeon.bullet -= ammoCost;
+                if (Dungeon.bullet < 0) Dungeon.bullet = 0;
+            }
+
+            if (Dungeon.hero.buff(PenetrationShotBuff.class) != null) {
+                Dungeon.hero.buff(PenetrationShotBuff.class).detach();
+            }
+
+            if (Dungeon.hero.subClass != HeroSubClass.BOWMASTER) {
+                Buff.affect(Dungeon.hero, BowFatigue.class).countUp(1);
+            }
+
+            if (Dungeon.hero.subClass == HeroSubClass.BOWMASTER) {
+                Buff.affect(Dungeon.hero, BowMasterSkill.class).shoot();
+            }
+
+            // ❌ Spectre Arrow 환급 없음
+
+            updateQuickslot();
+        }
+
+        @Override
+        public void throwSound() {
+            Sample.INSTANCE.play(Assets.Sounds.HIT_MAGIC, 1, Random.Float(0.87f, 1.15f));
         }
     }
 }
