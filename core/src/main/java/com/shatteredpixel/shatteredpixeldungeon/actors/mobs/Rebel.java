@@ -262,6 +262,7 @@ public class Rebel extends Mob {
 		super.die( cause );
 
 		//Badges.validateBossSlain(); //TODO 뱃지 추가 필요
+		Badges.validateTakingTheMick2(cause);
 
 		Dungeon.level.unseal();
 

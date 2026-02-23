@@ -282,7 +282,8 @@ public class Badges {
 		UNLOCK_MEDIC				(140),
 		UNLOCK_ARCHER				(141),
 
-		HEDGEHOG					(142);
+		HEDGEHOG					(142),
+		TAKING_THE_MICK_2			(143);
 
 		public boolean meta;
 
@@ -1216,6 +1217,17 @@ public class Badges {
 			displayBadge(Badge.TAKING_THE_MICK);
 		}
 	}
+
+
+	public static void validateTakingTheMick2(Object cause){
+		if ((cause == Dungeon.hero || cause instanceof Explosive.ExplosiveCurseBomb)
+				&& Dungeon.hero.belongings.attackingWeapon() instanceof Pickaxe
+				&& Dungeon.hero.belongings.attackingWeapon().level() >= 26){
+			local.add( Badge.TAKING_THE_MICK_2 );
+			displayBadge(Badge.TAKING_THE_MICK_2);
+		}
+	}
+
 
 	public static void validateNoKilling() {
 		if (!local.contains( Badge.NO_MONSTERS_SLAIN ) && Statistics.completedWithNoKilling) {
