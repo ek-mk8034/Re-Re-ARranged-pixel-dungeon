@@ -40,7 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.BowWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.GreatBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ObsidianBow;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -54,7 +54,7 @@ import java.util.Arrays;
 public class RuinBow extends BowWeapon implements AlchemyWeapon {
 
     {
-        tier = 6;
+        tier = 7;
         image = ItemSpriteSheet.RUINBOW;
     }
 
@@ -72,7 +72,7 @@ public class RuinBow extends BowWeapon implements AlchemyWeapon {
     @Override
     public ArrayList<Class<? extends Item>> weaponRecipe() {
         return new ArrayList<>(Arrays.asList(
-                GreatBow.class,
+                ObsidianBow.class,
                 WandOfDisintegration.class,
                 Evolution.class
         ));
@@ -116,7 +116,6 @@ public class RuinBow extends BowWeapon implements AlchemyWeapon {
         }
 
         /**
-         * 필중 제거 핵심:
          * - 각 타겟에 대해 curUser.shoot(target, this)를 호출해서
          *   기본 활의 명중/회피 계산을 그대로 탄다.
          * - 관통 배율은 shoot()의 데미지 흐름에서 proc()가 호출되므로,
@@ -138,14 +137,14 @@ public class RuinBow extends BowWeapon implements AlchemyWeapon {
 
             Hero hero = (Hero) curUser;
 
-            // ✅ 붙어있어도 발사 허용 (dist==1 OK). 자기 자신(0)만 무시.
+            // 붙어있어도 발사 허용 (dist==1 OK). 자기 자신(0)만 무시.
             Ballistica pre = new Ballistica(hero.pos, cell, Ballistica.PROJECTILE);
             if (pre.dist <= 0) return;
 
             // 빔 트레이스
             Ballistica beam = new Ballistica(hero.pos, cell, Ballistica.WONT_STOP);
 
-            // ✅ “목표 지점(cell)”까지만 처리하도록 clamp
+            // “목표 지점(cell)”까지만 처리하도록 clamp
             int endDist = endDistToCell(beam, cell);
 
             // ─────────────────────────────────────────────
@@ -161,7 +160,7 @@ public class RuinBow extends BowWeapon implements AlchemyWeapon {
 
                 boolean isSolid = Dungeon.level.solid[c];
                 if (isSolid && !wasSolid) {
-                    solidBlocks++;               // ✅ 장애물 “덩어리” 단위 카운트
+                    solidBlocks++;               // 장애물 “덩어리” 단위 카운트
                 }
                 wasSolid = isSolid;
 
@@ -213,10 +212,10 @@ public class RuinBow extends BowWeapon implements AlchemyWeapon {
 
                     enemiesSeen++;
 
-                    // ✅ 관통당 +10% (cap 2.0) — “칸수”가 아니라 관통(덩어리/대상) 기반
+                    // 관통당 +10% (cap 2.0) — “칸수”가 아니라 관통(덩어리/대상) 기반
                     shotMult = damageMultiplier(solidBlocks, enemiesSeen);
 
-                    // ✅ 기존 활 정확도/회피 적용(필중 제거)
+                    // 기존 활 정확도/회피 적용(필중 제거)
                     boolean hit = curUser.shoot(ch, this);
 
                     // 기존 활 훅 유지
@@ -307,7 +306,7 @@ public class RuinBow extends BowWeapon implements AlchemyWeapon {
                 Buff.affect(Dungeon.hero, BowMasterSkill.class).shoot();
             }
 
-            // ❌ Spectre Arrow 환급 없음
+            // Spectre Arrow 환급 없음
 
             updateQuickslot();
         }

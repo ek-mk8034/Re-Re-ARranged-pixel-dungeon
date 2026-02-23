@@ -112,6 +112,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.UpgradeDust;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfMagicMissile;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfDisintegration;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Cudgel;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dagger;
@@ -125,9 +126,10 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Shovel;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LargeKatana;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RunicBlade;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LunarBlade;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ObsidianKnife;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ObsidianBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.TacticalShield;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.GreatBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.WornShortBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.AR.AR_T1;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.quick.PocketKnife;
@@ -210,10 +212,12 @@ public enum HeroClass {
 		    new KingsCrown().collect();
 		    new OldAmulet().collect();
 
-		    new RunicBlade().identify().collect();
+		    new ObsidianKnife().identify().collect();
 		    new UpgradeDust().identify().quantity(10);
 		    new Evolution().identify().quantity(5).collect();
-		    new LargeKatana().identify().upgrade(5).collect();
+		    new WandOfDisintegration().identify().upgrade(5).collect();
+		    new ObsidianBow().identify().upgrade(5).collect();
+		    new GreatBow().identify().upgrade(5).collect();
 
 		    //new HandyBarricade().identify().quantity(20).collect();
 		    //new WildEnergy().identify().quantity(20).collect();

@@ -247,6 +247,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.Lance
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LanceNShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LunarBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.MeisterHammer;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ObsidianBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ObsidianKnife;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ObsidianShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.RL_T6;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.SR_T6;
@@ -678,9 +680,10 @@ public class Generator {
 			WEP_T5.probs = WEP_T5.defaultProbs.clone();
 
 			WEP_AL_T3.classes = new Class<?>[]{
-					SpearNShield.class
+					SpearNShield.class,
+					ObsidianKnife.class
 			};
-			WEP_AL_T3.defaultProbs = new float[]{ 0 };
+			WEP_AL_T3.defaultProbs = new float[]{ 0, 0 };
 			WEP_AL_T3.probs = WEP_AL_T3.defaultProbs.clone();
 
 			WEP_AL_T4.classes = new Class<?>[]{
@@ -714,17 +717,18 @@ public class Generator {
 					BeamSaber.class,
 					SharpKatana.class,
 					AssassinsSpear.class,
-					RuinBow.class
+					ObsidianBow.class
 			};
-			WEP_AL_T6.defaultProbs = new float[]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+			WEP_AL_T6.defaultProbs = new float[]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 			WEP_AL_T6.probs = WEP_AL_T6.defaultProbs.clone();
 
 			WEP_AL_T7.classes = new Class<?>[]{
 					LanceNShield.class,
 					TacticalShield.class,
-					HolySword.class
+					HolySword.class,
+					RuinBow.class
 			};
-			WEP_AL_T7.defaultProbs = new float[]{ 0, 0, 0 };
+			WEP_AL_T7.defaultProbs = new float[]{ 0, 0, 0, 0 };
 			WEP_AL_T7.probs = WEP_AL_T7.defaultProbs.clone();
 
 			WEP_SP.classes = new Class<?>[]{

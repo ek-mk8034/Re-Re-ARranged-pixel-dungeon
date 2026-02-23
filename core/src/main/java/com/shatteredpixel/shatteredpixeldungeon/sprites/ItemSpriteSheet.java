@@ -991,11 +991,13 @@ public class ItemSpriteSheet {
 	public static final int KNIFE			= NEW_WEP_TIER_2+1;
 	public static final int NUNCHAKU		= NEW_WEP_TIER_2+2;
 	public static final int DUAL_DAGGER		= NEW_WEP_TIER_2+3;
+	public static final int OBSIDIAN_KNIFE	= NEW_WEP_TIER_2+4;
 	static{
-		assignItemRect(SHORT_KATANA	, 14, 14);
-		assignItemRect(KNIFE		, 12, 13);
-		assignItemRect(NUNCHAKU		, 16, 16);
-		assignItemRect(DUAL_DAGGER	, 16, 16);
+		assignItemRect(SHORT_KATANA		, 14, 14);
+		assignItemRect(KNIFE			, 12, 13);
+		assignItemRect(NUNCHAKU			, 16, 16);
+		assignItemRect(DUAL_DAGGER		, 16, 16);
+		assignItemRect(OBSIDIAN_KNIFE	, 12, 13);
 	}
 
 	private static final int NEW_WEP_TIER_3	=			xy(1, 46);  //8 slots
@@ -1537,13 +1539,15 @@ public class ItemSpriteSheet {
 	public static final int BOW						= BOW_WEAPONS+2;
 	public static final int LONGBOW					= BOW_WEAPONS+3;
 	public static final int GREATBOW				= BOW_WEAPONS+4;
-	public static final int RUINBOW					= BOW_WEAPONS+5;
+	public static final int OBSIDIANBOW				= BOW_WEAPONS+5;
+	public static final int RUINBOW					= BOW_WEAPONS+6;
 	static {
 		assignItemRect(WORN_SHORTBOW, 12, 12);
 		assignItemRect(SHORTBOW		, 13, 13);
 		assignItemRect(BOW			, 15, 15);
 		assignItemRect(LONGBOW		, 16, 16);
 		assignItemRect(GREATBOW		, 16, 16);
+		assignItemRect(OBSIDIANBOW	, 16, 16);
 		assignItemRect(RUINBOW		, 16, 16);
 	}
 
