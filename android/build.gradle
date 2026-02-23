@@ -40,7 +40,7 @@ android {
         debug {
             // ✅ 기존 앱과 충돌 방지 (둘 다 설치 가능)
             applicationIdSuffix ".indev"
-            versionNameSuffix "-INDEV"
+            versionNameSuffix " "
 
             dependencies {
                 debugImplementation project(':services:updates:debugUpdates')

@@ -5,6 +5,9 @@
  * Shattered Pixel Dungeon
  * Copyright (C) 2014-2025 Evan Debenham
  *
+ * Re-ReARranged Pixel Dungeon
+ * Copyright (C) 2026 Eric Kim (ek-mk8034)
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -32,7 +35,6 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.BannerSprites;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Fireball;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.services.news.News;
 import com.shatteredpixel.shatteredpixeldungeon.services.updates.AvailableUpdateData;
 import com.shatteredpixel.shatteredpixeldungeon.services.updates.Updates;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -59,20 +61,17 @@ import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.RectF;
 
-import java.util.Date;
-
 public class TitleScene extends PixelScene {
 
 	private Image title;
 	private Fireball leftFB;
 	private Fireball rightFB;
-	private Image signs;
+	//private Image signs;
 
 	private StyledButton btnPlay;
 	private StyledButton btnSupport;
 	private StyledButton btnRankings;
 	private StyledButton btnJournal;
-	private StyledButton btnNews;
 	private StyledButton btnChanges;
 	private StyledButton btnSettings;
 	private StyledButton btnAbout;
@@ -119,31 +118,10 @@ public class TitleScene extends PixelScene {
 			leftFB = placeTorch(title.x + 30, title.y + 35);
 			rightFB = placeTorch(title.x + title.width - 30, title.y + 35);
 		} else {
-			leftFB = placeTorch(title.x + 16, title.y + 70);
-			rightFB = placeTorch(title.x + title.width - 16, title.y + 70);
+			leftFB = placeTorch(title.x + 22, title.y + 75);
+			rightFB = placeTorch(title.x + title.width - 15, title.y + 75);
 		}
 
-		signs = new Image(BannerSprites.get(landscape() ? BannerSprites.Type.TITLE_GLOW_LAND : BannerSprites.Type.TITLE_GLOW_PORT)) {
-			private float time = 0;
-
-			@Override
-			public void update() {
-				super.update();
-				am = Math.max(0f, (float) Math.sin(time += Game.elapsed));
-				am = Math.min(am, title.am);
-				if (time >= 1.5f * Math.PI) time = 0;
-			}
-
-			@Override
-			public void draw() {
-				Blending.setLightMode();
-				super.draw();
-				Blending.setNormalMode();
-			}
-		};
-		signs.x = title.x + (title.width() - signs.width()) / 2f;
-		signs.y = title.y;
-		add(signs);
 
 		final Chrome.Type GREY_TR = Chrome.Type.GREY_BUTTON_TR;
 
@@ -177,6 +155,7 @@ public class TitleScene extends PixelScene {
 		btnSupport = new SupportButton(GREY_TR, Messages.get(this, "support"));
 		add(btnSupport);
 
+		// 랭킹: "지원/피드백"처럼 길게(가로 넓게) 배치할 예정
 		btnRankings = new StyledButton(GREY_TR, Messages.get(this, "rankings")) {
 			@Override
 			protected void onClick() {
@@ -196,11 +175,6 @@ public class TitleScene extends PixelScene {
 		btnJournal.icon(Icons.get(Icons.JOURNAL));
 		add(btnJournal);
 
-		// Keep enabled: updateFade() uses btnNews.
-		btnNews = new NewsButton(GREY_TR, Messages.get(this, "news"));
-		btnNews.icon(Icons.get(Icons.NEWS));
-		add(btnNews);
-
 		btnChanges = new ChangesButton(GREY_TR, Messages.get(this, "changes"));
 		btnChanges.icon(Icons.get(Icons.CHANGES));
 		add(btnChanges);
@@ -219,41 +193,54 @@ public class TitleScene extends PixelScene {
 		add(btnAbout);
 
 		final int BTN_HEIGHT = 20;
-		int GAP = (int) (h - topRegion - (landscape() ? 3 : 4) * BTN_HEIGHT) / 3;
-		GAP /= landscape() ? 3 : 5;
-		GAP = Math.max(GAP, 2);
+
+		int rows = landscape() ? 4 : 5;
+
+		final int GAP = 1;   
 
 		float buttonAreaWidth = landscape() ? PixelScene.MIN_WIDTH_L - 6 : PixelScene.MIN_WIDTH_P - 2;
 		float btnAreaLeft = insets.left + (w - buttonAreaWidth) / 2f;
 
 		if (landscape()) {
+
+			// Row 1: Play | Support
 			btnPlay.setRect(btnAreaLeft, insets.top + topRegion + GAP, (buttonAreaWidth / 2) - 1, BTN_HEIGHT);
 			align(btnPlay);
-
 			btnSupport.setRect(btnPlay.right() + 2, btnPlay.top(), btnPlay.width(), BTN_HEIGHT);
 
-			btnRankings.setRect(btnPlay.left(), btnPlay.bottom() + GAP, (float) (Math.floor(buttonAreaWidth / 3f) - 1), BTN_HEIGHT);
-			btnJournal.setRect(btnRankings.right() + 2, btnRankings.top(), btnRankings.width(), BTN_HEIGHT);
-			btnNews.setRect(btnJournal.right() + 2, btnJournal.top(), btnRankings.width(), BTN_HEIGHT);
+			// Row 2: Rankings (full width, like a long bar)
+			btnRankings.setRect(btnAreaLeft, btnPlay.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
+			align(btnRankings);
 
-			btnSettings.setRect(btnRankings.left(), btnRankings.bottom() + GAP, btnRankings.width(), BTN_HEIGHT);
-			btnChanges.setRect(btnSettings.right() + 2, btnSettings.top(), btnRankings.width(), BTN_HEIGHT);
-			btnAbout.setRect(btnChanges.right() + 2, btnSettings.top(), btnRankings.width(), BTN_HEIGHT);
+			// Row 3: Journal | Changes (same line)
+			float half = (buttonAreaWidth / 2) - 1;
+			btnJournal.setRect(btnAreaLeft, btnRankings.bottom() + GAP, half, BTN_HEIGHT);
+			btnChanges.setRect(btnJournal.right() + 2, btnJournal.top(), half, BTN_HEIGHT);
+
+			// Row 4 (bottom): Settings | About (keep as before style: two small buttons at bottom)
+			btnSettings.setRect(btnAreaLeft, btnJournal.bottom() + GAP, half, BTN_HEIGHT);
+			btnAbout.setRect(btnSettings.right() + 2, btnSettings.top(), half, BTN_HEIGHT);
 
 		} else {
+
+			// Row 1: Play (full)
 			btnPlay.setRect(btnAreaLeft, insets.top + topRegion + GAP, buttonAreaWidth, BTN_HEIGHT);
 			align(btnPlay);
 
+			// Row 2: Support (full)
 			btnSupport.setRect(btnPlay.left(), btnPlay.bottom() + GAP, btnPlay.width(), BTN_HEIGHT);
 
-			btnRankings.setRect(btnPlay.left(), btnSupport.bottom() + GAP, (btnPlay.width() / 2) - 1, BTN_HEIGHT);
-			btnJournal.setRect(btnRankings.right() + 2, btnRankings.top(), btnRankings.width(), BTN_HEIGHT);
+			// Row 3: Rankings (full, like Support)
+			btnRankings.setRect(btnPlay.left(), btnSupport.bottom() + GAP, btnPlay.width(), BTN_HEIGHT);
 
-			btnNews.setRect(btnRankings.left(), btnRankings.bottom() + GAP, btnRankings.width(), BTN_HEIGHT);
-			btnChanges.setRect(btnNews.right() + 2, btnNews.top(), btnNews.width(), BTN_HEIGHT);
+			// Row 4: Journal | Changes (same line)
+			float half = (btnPlay.width() / 2) - 1;
+			btnJournal.setRect(btnPlay.left(), btnRankings.bottom() + GAP, half, BTN_HEIGHT);
+			btnChanges.setRect(btnJournal.right() + 2, btnJournal.top(), half, BTN_HEIGHT);
 
-			btnSettings.setRect(btnNews.left(), btnNews.bottom() + GAP, btnRankings.width(), BTN_HEIGHT);
-			btnAbout.setRect(btnSettings.right() + 2, btnSettings.top(), btnSettings.width(), BTN_HEIGHT);
+			// Row 5 (bottom): Settings | About (keep as now)
+			btnSettings.setRect(btnPlay.left(), btnJournal.bottom() + GAP, half, BTN_HEIGHT);
+			btnAbout.setRect(btnSettings.right() + 2, btnSettings.top(), half, BTN_HEIGHT);
 		}
 
 		version = new BitmapText(Game.version , pixelFont);
@@ -332,7 +319,6 @@ public class TitleScene extends PixelScene {
 		btnSupport.enable(alpha != 0);
 		btnRankings.enable(alpha != 0);
 		btnJournal.enable(alpha != 0);
-		btnNews.enable(alpha != 0);
 		btnChanges.enable(alpha != 0);
 		btnSettings.enable(alpha != 0);
 		btnAbout.enable(alpha != 0);
@@ -341,7 +327,6 @@ public class TitleScene extends PixelScene {
 		btnSupport.alpha(alpha);
 		btnRankings.alpha(alpha);
 		btnJournal.alpha(alpha);
-		btnNews.alpha(alpha);
 		btnChanges.alpha(alpha);
 		btnSettings.alpha(alpha);
 		btnAbout.alpha(alpha);
@@ -362,46 +347,6 @@ public class TitleScene extends PixelScene {
 		align(fb);
 		add(fb);
 		return fb;
-	}
-
-	private static class NewsButton extends StyledButton {
-
-		public NewsButton(Chrome.Type type, String label) {
-			super(type, label);
-			if (SPDSettings.news()) News.checkForNews();
-		}
-
-		int unreadCount = -1;
-
-		@Override
-		public void update() {
-			super.update();
-
-			if (unreadCount == -1 && News.articlesAvailable()) {
-				long lastRead = SPDSettings.newsLastRead();
-				if (lastRead == 0) {
-					if (News.articles().get(0) != null) {
-						SPDSettings.newsLastRead(News.articles().get(0).date.getTime());
-					}
-				} else {
-					unreadCount = News.unreadArticles(new Date(SPDSettings.newsLastRead()));
-					if (unreadCount > 0) {
-						unreadCount = Math.min(unreadCount, 9);
-						text(text() + "(" + unreadCount + ")");
-					}
-				}
-			}
-
-			if (unreadCount > 0) {
-				textColor(ColorMath.interpolate(0xFFFFFF, Window.SHPX_COLOR, 0.5f + (float) Math.sin(Game.timeTotal * 5) / 2f));
-			}
-		}
-
-		@Override
-		protected void onClick() {
-			super.onClick();
-			ShatteredPixelDungeon.switchNoFade(NewsScene.class);
-		}
 	}
 
 	private static class ChangesButton extends StyledButton {
@@ -493,7 +438,7 @@ public class TitleScene extends PixelScene {
 
 		public SupportButton(Chrome.Type type, String label) {
 			super(type, label);
-			icon(Icons.get(Icons.DISCORD));
+			icon(Icons.get(Icons.GITHUB));
 			textColor(Window.TITLE_COLOR);
 		}
 

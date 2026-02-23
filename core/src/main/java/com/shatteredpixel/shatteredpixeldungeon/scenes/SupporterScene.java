@@ -5,6 +5,9 @@
  * Shattered Pixel Dungeon
  * Copyright (C) 2014-2025 Evan Debenham
  *
+ * Re-ReARranged Pixel Dungeon
+ * Copyright (C) 2026 Eric Kim (ek-mk8034)
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -23,7 +26,6 @@ package com.shatteredpixel.shatteredpixeldungeon.scenes;
 
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ExitButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
@@ -36,13 +38,11 @@ import com.watabou.noosa.Camera;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.NinePatch;
 import com.watabou.noosa.ui.Component;
-import com.watabou.utils.Callback;
 import com.watabou.utils.RectF;
 
 public class SupporterScene extends PixelScene {
 
 	private static final int BTN_HEIGHT = 22;
-	private static final int GAP = 2;
 
 	@Override
 	public void create() {
@@ -66,7 +66,7 @@ public class SupporterScene extends PixelScene {
 		btnExit.setPos(insets.left + w - btnExit.width(), insets.top);
 		add(btnExit);
 
-		IconTitle title = new IconTitle(Icons.GOLD.get(), Messages.get(this, "title"));
+		IconTitle title = new IconTitle(Icons.GITHUB.get(), Messages.get(this, "title"));
 		title.setSize(200, 0);
 		title.setPos(
 				insets.left + (w - title.reqWidth()) / 2f,
@@ -83,32 +83,16 @@ public class SupporterScene extends PixelScene {
 			@Override
 			protected void onClick() {
 				super.onClick();
-				String link = "https://github.com/Hoto-Mocha/Re-ARranged-Pixel-Dungeon";
+				String link = "https://github.com/ek-mk8034/Re-rearranged-pixel-dungeon";
 				ShatteredPixelDungeon.platform.openURI(link);
 			}
 		};
 		link.icon(Icons.get(Icons.GITHUB));
 		link.textColor(Window.TITLE_COLOR);
-		link.setSize(elementWidth/2-GAP/2, BTN_HEIGHT);
+		link.setSize(elementWidth, BTN_HEIGHT);
 		add(link);
 
-		StyledButton discord = new StyledButton(Chrome.Type.GREY_BUTTON_TR, Messages.get(this, "discord_link")){
-			@Override
-			protected void onClick() {
-				super.onClick();
-				String link = "https://discord.gg/kPdqgrEsSQ";
-				if (Messages.lang() != Languages.KOREAN) {
-					link = "https://discord.gg/yHhXxbrsP3";
-				}
-				ShatteredPixelDungeon.platform.openURI(link);
-			}
-		};
-		discord.icon(Icons.get(Icons.DISCORD));
-		discord.textColor(Window.TITLE_COLOR);
-		discord.setSize(elementWidth/2-GAP/2, BTN_HEIGHT);
-		add(discord);
-
-		float elementHeight = msg.height() + BTN_HEIGHT + GAP;
+		float elementHeight = msg.height() + BTN_HEIGHT;
 
 		float top = insets.top + 16 + (h - 16 - elementHeight)/2f;
 		float left = insets.left + (w-elementWidth)/2f;
@@ -116,10 +100,8 @@ public class SupporterScene extends PixelScene {
 		msg.setPos(left, top);
 		align(msg);
 
-		link.setPos(left, msg.bottom()+GAP);
-		discord.setPos(link.right()+GAP, msg.bottom()+GAP);
+		link.setPos(left, msg.bottom());
 		align(link);
-
 	}
 
 	@Override
@@ -139,15 +121,14 @@ public class SupporterScene extends PixelScene {
 			add(bg);
 
 			String message = Messages.get(SupporterScene.class, "intro");
-			message += "\n\n" + Messages.get(SupporterScene.class, "discord_msg");
-			message += "\n\n- Cocoa(Hoto-Mocha)";
+			message += "\n\n" + Messages.get(SupporterScene.class, "git_msg"); 
+			message += "\n\n- Eric (ek-mk8034)";
 
 			text = PixelScene.renderTextBlock(message, 6);
 			add(text);
 
 			icon = Icons.get(Icons.ARRANGED);
 			add(icon);
-
 		}
 
 		@Override
@@ -162,13 +143,9 @@ public class SupporterScene extends PixelScene {
 			icon.x = x + 65;
 
 			height = (text.bottom() + 3) - y;
-
 			height += bg.marginBottom();
 
 			bg.size(width, height);
-
 		}
-
 	}
-
 }

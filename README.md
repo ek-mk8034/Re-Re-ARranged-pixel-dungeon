@@ -1,3 +1,10 @@
+# Re-ReARranged Pixel Dungeon
+**ReARranged Pixel Dungeon** is the reworked version of [ReARranged Pixel Dungeon](https://github.com/Hoto-Mocha/Re-ARranged-Pixel-Dungeon), which is and extended version of [ARranged Pixel Dungeon](https://github.com/Hoto-Mocha/ARranged-Pixel-Dungeon), which is basically an extended version of [Shattered Pixel Dungeon](https://github.com/00-Evan/shattered-pixel-dungeon) by [Evan Debenham](https://github.com/00-Evan)  and has been made with its open source under the GPLv3 license.
+
+This game fully supports Korean language basically. English language is supported too, which is translated by ChatGPT but not double checked yet.
+
+For now this game does not have download link in Google Play or App Store. It is only distributed in [DCinside SPD gallery](https://gall.dcinside.com/mgallery/board/lists?id=spd), which is a Korean community site. Patch notes will also be written only in Korean for now. 
+
 # ReARranged Pixel Dungeon
 **ReARranged Pixel Dungeon** is the reworked version of [ARranged Pixel Dungeon](https://github.com/Hoto-Mocha/ARranged-Pixel-Dungeon), which is basically an extended version of [Shattered Pixel Dungeon](https://github.com/00-Evan/shattered-pixel-dungeon) by [Evan Debenham](https://github.com/00-Evan)  and has been made with its open source under the GPLv3 license.
 
